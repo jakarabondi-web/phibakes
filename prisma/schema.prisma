@@ -1,0 +1,657 @@
+// PhiBakes — Prisma schema
+// Models the full bakery ERP + e-commerce data domain described in the product spec.
+// Provider defaults to PostgreSQL (Neon). Set DATABASE_URL in your environment.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & Access
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  CUSTOMER
+  OWNER
+  MANAGER
+  BAKER
+  DECORATOR
+  DELIVERY_RIDER
+  SUPPORT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phone         String?   @unique
+  passwordHash  String?
+  name          String
+  avatarUrl     String?
+  role          UserRole  @default(CUSTOMER)
+  emailVerified DateTime?
+  twoFactorEnabled Boolean @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  customer      Customer?
+  staff         Staff?
+  permissions   UserPermission[]
+  notifications Notification[]
+  messagesSent  Message[]        @relation("MessageSender")
+  auditLogs     AuditLog[]
+  reviews       Review[]
+
+  @@index([role])
+}
+
+model Permission {
+  id          String @id @default(cuid())
+  key         String @unique // e.g. "orders.manage", "inventory.edit"
+  description String
+
+  users UserPermission[]
+}
+
+model UserPermission {
+  id           String     @id @default(cuid())
+  userId       String
+  permissionId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+}
+
+// ---------------------------------------------------------------------------
+// Customers & Staff
+// ---------------------------------------------------------------------------
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loyaltyPoints  Int      @default(0)
+  tier           LoyaltyTier @default(BRONZE)
+  referralCode   String   @unique @default(cuid())
+  referredById   String?
+  createdAt      DateTime @default(now())
+
+  addresses      Address[]
+  orders         Order[]
+  quotes         Quote[]
+  invoices       Invoice[]
+  payments       Payment[]
+  reviews        Review[]  @relation("CustomerReviews")
+  wishlist       WishlistItem[]
+  coupons        CouponRedemption[]
+  rewards        RewardTransaction[]
+}
+
+enum StaffRole {
+  MANAGER
+  BAKER
+  DECORATOR
+  DELIVERY_RIDER
+  SUPPORT
+}
+
+model Staff {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      StaffRole
+  isActive  Boolean   @default(true)
+  hiredAt   DateTime  @default(now())
+
+  assignedOrders     Order[]           @relation("AssignedStaff")
+  productionTasks    ProductionTask[]
+  deliveries         Delivery[]
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label       String   // "Home", "Office"
+  line1       String
+  line2       String?
+  city        String   @default("Nairobi")
+  zone        String?  // delivery zone
+  lat         Float?
+  lng         Float?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  orders      Order[]
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+
+  products    Product[]
+}
+
+enum CakeSize {
+  HALF_KG
+  ONE_KG
+  TWO_KG
+  THREE_KG
+  MULTI_TIER
+  CUSTOM
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  name             String
+  description      String
+  categoryId       String
+  category         Category @relation(fields: [categoryId], references: [id])
+  price            Decimal  @db.Decimal(10, 2)
+  compareAtPrice   Decimal? @db.Decimal(10, 2)
+  servings         String
+  prepTimeHours    Int      @default(24)
+  isAvailable      Boolean  @default(true)
+  productionPoints Int      @default(1)
+  sizes            CakeSize[]
+  flavours         String[]
+  images           String[]
+  tags             String[]
+  ratingAvg        Float    @default(0)
+  ratingCount      Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orderItems       OrderItem[]
+  reviews          Review[]
+  wishlistItems    WishlistItem[]
+  recipe           Recipe?
+
+  @@index([categoryId])
+}
+
+model Recipe {
+  id          String   @id @default(cuid())
+  productId   String   @unique
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  instructions String
+  yieldNotes  String?
+  ingredients RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id            String        @id @default(cuid())
+  recipeId      String
+  recipe        Recipe        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  inventoryItemId String
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity      Float
+  unit          String
+}
+
+// ---------------------------------------------------------------------------
+// Orders, Quotes, Custom Builder
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  REQUESTED
+  QUOTED
+  DEPOSIT_PENDING
+  CONFIRMED
+  INGREDIENTS_READY
+  BAKING
+  DECORATING
+  QUALITY_CHECK
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum FulfilmentType {
+  PICKUP
+  DELIVERY
+}
+
+model Order {
+  id               String        @id @default(cuid())
+  code             String        @unique
+  customerId       String
+  customer         Customer      @relation(fields: [customerId], references: [id])
+  assignedStaffId  String?
+  assignedStaff    Staff?        @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
+  status           OrderStatus   @default(REQUESTED)
+  fulfilment       FulfilmentType
+  addressId        String?
+  address          Address?      @relation(fields: [addressId], references: [id])
+  eventDate        DateTime
+  productionPoints Int           @default(1)
+  subtotal         Decimal       @db.Decimal(10, 2)
+  discountAmount   Decimal       @default(0) @db.Decimal(10, 2)
+  deliveryFee      Decimal       @default(0) @db.Decimal(10, 2)
+  total            Decimal       @db.Decimal(10, 2)
+  depositAmount    Decimal       @db.Decimal(10, 2)
+  customerNotes    String?
+  internalNotes    String?
+  couponId         String?
+  coupon           Coupon?       @relation(fields: [couponId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  items            OrderItem[]
+  payments         Payment[]
+  invoices         Invoice[]
+  productionTasks  ProductionTask[]
+  delivery         Delivery?
+  quote            Quote?
+  notifications    Notification[]
+  statusHistory    OrderStatusEvent[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([eventDate])
+}
+
+model OrderStatusEvent {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  product      Product? @relation(fields: [productId], references: [id])
+  nameSnapshot String
+  size         String
+  flavour      String
+  filling      String?
+  decoration   String?
+  quantity     Int      @default(1)
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  isCustom     Boolean  @default(false)
+  referenceImages String[]
+}
+
+enum QuoteStatus {
+  PENDING_REVIEW
+  QUOTED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model Quote {
+  id                  String      @id @default(cuid())
+  code                String      @unique
+  customerId          String
+  customer            Customer    @relation(fields: [customerId], references: [id])
+  occasion             String
+  size                 String
+  flavour              String
+  filling              String
+  decoration           String
+  eventDate            DateTime
+  guests               Int
+  status               QuoteStatus @default(PENDING_REVIEW)
+  estimatedPrice       Decimal?    @db.Decimal(10, 2)
+  quotedPrice          Decimal?    @db.Decimal(10, 2)
+  specialInstructions  String?
+  referenceImages      String[]
+  convertedOrderId     String?     @unique
+  convertedOrder       Order?      @relation(fields: [convertedOrderId], references: [id])
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Payments & Invoicing (M-PESA Daraja)
+// ---------------------------------------------------------------------------
+
+enum PaymentType {
+  DEPOSIT
+  BALANCE
+  FULL
+}
+
+enum PaymentMethod {
+  MPESA
+  CARD
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id])
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  type           PaymentType
+  method         PaymentMethod
+  amount         Decimal       @db.Decimal(10, 2)
+  status         PaymentStatus @default(PENDING)
+  phoneNumber    String?
+  mpesaCheckoutRequestId String?
+  mpesaReceiptNumber     String?
+  failureReason  String?
+  retryOfId      String?
+  retryOf        Payment?      @relation("PaymentRetry", fields: [retryOfId], references: [id])
+  retries        Payment[]     @relation("PaymentRetry")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  callbacks      PaymentCallback[]
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model PaymentCallback {
+  id             String   @id @default(cuid())
+  paymentId      String
+  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  rawPayload     Json
+  resultCode     Int?
+  resultDesc     String?
+  receivedAt     DateTime @default(now())
+}
+
+model Invoice {
+  id           String   @id @default(cuid())
+  number       String   @unique
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id])
+  subtotal     Decimal  @db.Decimal(10, 2)
+  discount     Decimal  @default(0) @db.Decimal(10, 2)
+  tax          Decimal  @default(0) @db.Decimal(10, 2)
+  total        Decimal  @db.Decimal(10, 2)
+  amountPaid   Decimal  @default(0) @db.Decimal(10, 2)
+  pdfUrl       String?
+  issuedAt     DateTime @default(now())
+  dueAt        DateTime?
+}
+
+// ---------------------------------------------------------------------------
+// Notifications & Messaging
+// ---------------------------------------------------------------------------
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  IN_APP
+  PUSH
+}
+
+enum NotificationEvent {
+  DEPOSIT_RECEIVED
+  QUOTE_READY
+  ORDER_CONFIRMED
+  BALANCE_DUE
+  CAKE_READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  LOW_STOCK
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String?
+  order     Order?               @relation(fields: [orderId], references: [id])
+  channel   NotificationChannel
+  event     NotificationEvent
+  title     String
+  body      String
+  readAt    DateTime?
+  sentAt    DateTime             @default(now())
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id])
+  subject    String?
+  body       String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Inventory & Suppliers
+// ---------------------------------------------------------------------------
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  contactName String?
+  phone       String?
+  email       String?
+  createdAt   DateTime @default(now())
+
+  inventoryItems InventoryItem[]
+}
+
+enum StockStatus {
+  HEALTHY
+  LOW
+  CRITICAL
+}
+
+model InventoryItem {
+  id            String       @id @default(cuid())
+  name          String
+  category      String
+  unit          String
+  quantity      Float
+  reorderLevel  Float
+  costPerUnit   Decimal      @db.Decimal(10, 2)
+  supplierId    String?
+  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
+  expiryDate    DateTime?
+  status        StockStatus  @default(HEALTHY)
+  updatedAt     DateTime     @updatedAt
+
+  recipeUsages  RecipeIngredient[]
+}
+
+// ---------------------------------------------------------------------------
+// Production & Delivery
+// ---------------------------------------------------------------------------
+
+enum ProductionStage {
+  INGREDIENT_PREP
+  BAKE
+  COOLING
+  DECORATION
+  PACKAGING
+  DELIVERY
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+model ProductionTask {
+  id         String          @id @default(cuid())
+  orderId    String
+  order      Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stage      ProductionStage
+  staffId    String?
+  staff      Staff?          @relation(fields: [staffId], references: [id])
+  startsAt   DateTime
+  endsAt     DateTime
+  status     TaskStatus      @default(PENDING)
+  notes      String?
+
+  @@index([orderId])
+  @@index([stage])
+}
+
+enum DeliveryStatus {
+  PENDING
+  ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+}
+
+model Delivery {
+  id             String         @id @default(cuid())
+  orderId        String         @unique
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  riderId        String?
+  rider          Staff?         @relation(fields: [riderId], references: [id])
+  zone           String?
+  fee            Decimal        @default(0) @db.Decimal(10, 2)
+  status         DeliveryStatus @default(PENDING)
+  proofPhotoUrl  String?
+  signatureUrl   String?
+  otpCode        String?
+  otpVerifiedAt  DateTime?
+  dispatchedAt   DateTime?
+  deliveredAt    DateTime?
+}
+
+// ---------------------------------------------------------------------------
+// Reviews, Marketing, Rewards
+// ---------------------------------------------------------------------------
+
+model Review {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId   String
+  customer     Customer @relation("CustomerReviews", fields: [customerId], references: [id])
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  rating       Int
+  comment      String
+  photos       String[]
+  isVerified   Boolean  @default(true)
+  ownerReply   String?
+  createdAt    DateTime @default(now())
+
+  @@index([productId])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  BIRTHDAY
+  REFERRAL
+}
+
+model Coupon {
+  id           String     @id @default(cuid())
+  code         String     @unique
+  type         CouponType
+  value        Decimal    @db.Decimal(10, 2)
+  minSpend     Decimal?   @db.Decimal(10, 2)
+  usageLimit   Int?
+  usedCount    Int        @default(0)
+  startsAt     DateTime?
+  expiresAt    DateTime?
+  isActive     Boolean    @default(true)
+
+  orders       Order[]
+  redemptions  CouponRedemption[]
+}
+
+model CouponRedemption {
+  id         String   @id @default(cuid())
+  couponId   String
+  coupon     Coupon   @relation(fields: [couponId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  redeemedAt DateTime @default(now())
+
+  @@unique([couponId, customerId])
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  addedAt    DateTime @default(now())
+
+  @@unique([customerId, productId])
+}
+
+enum RewardTransactionType {
+  EARNED
+  REDEEMED
+  EXPIRED
+  ADJUSTED
+}
+
+model RewardTransaction {
+  id         String                 @id @default(cuid())
+  customerId String
+  customer   Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       RewardTransactionType
+  points     Int
+  reason     String
+  createdAt  DateTime               @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Audit
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
