@@ -1,28 +1,30 @@
-import { MousePointerClick, CalendarCheck, CreditCard, ChefHat, Truck } from "lucide-react";
+import Image from "next/image";
 
+// 240×240 icon set from the Option 1 asset pack — burgundy grounds with
+// white/gold linework, designed to sit inside this section's berry panel.
 const STEPS = [
   {
-    icon: MousePointerClick,
+    icon: "/images/how-it-works/choose.png",
     title: "Choose",
     copy: "Pick a cake or start a custom design",
   },
   {
-    icon: CalendarCheck,
+    icon: "/images/how-it-works/book.png",
     title: "Book",
     copy: "Select your date, time & delivery details",
   },
   {
-    icon: CreditCard,
+    icon: "/images/how-it-works/pay.png",
     title: "Pay",
     copy: "Pay securely via M-PESA or card",
   },
   {
-    icon: ChefHat,
+    icon: "/images/how-it-works/we-bake.png",
     title: "We Bake",
     copy: "Our artisans bake fresh with love and precision",
   },
   {
-    icon: Truck,
+    icon: "/images/how-it-works/deliver.png",
     title: "Deliver",
     copy: "We deliver on time, fresh to your doorstep",
   },
@@ -46,8 +48,8 @@ export function HowItWorks() {
 
             {STEPS.map((step, i) => (
               <div key={step.title} className="relative flex flex-col items-center text-center">
-                <div className="relative z-10 flex size-16 items-center justify-center rounded-full bg-primary-foreground/10 ring-1 ring-primary-foreground/25">
-                  <step.icon className="size-7 text-primary-foreground" strokeWidth={1.5} />
+                <div className="relative z-10 size-16 overflow-hidden rounded-full ring-1 ring-primary-foreground/25">
+                  <Image src={step.icon} alt="" fill className="object-cover" aria-hidden />
                 </div>
                 <span className="mt-4 text-xs font-semibold uppercase tracking-wider text-gold">
                   Step {i + 1}
