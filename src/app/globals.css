@@ -9,23 +9,29 @@
 
 :root {
   --radius: 1rem;
+  --radius-dashboard: 0.875rem;
 
-  /* Brand palette */
-  --berry: #7a294b;
-  --berry-dark: #591c37;
-  --berry-light: #9a3e63;
+  /* Brand palette — "Elegant & Warm" (Option 1) */
+  --berry: #71152d;
+  --berry-hover: #5f1025;
+  --berry-dark: #4b0d1e;
+  --berry-light: #8b3046;
   --cream: #fff8f0;
-  --blush: #f7e7ec;
+  --blush: #f7e8ea;
+  --surface-soft: #fbf3f3;
   --chocolate: #4a3028;
-  --gold: #c69a5b;
-  --gold-light: #ddbd8c;
-  --charcoal: #262326;
-  --success: #2f7d5a;
-  --error: #c0392b;
-  --warning: #e6a817;
+  --gold: #c99a67;
+  --gold-light: #ead4bc;
+  --charcoal: #32151d;
+  --success: #3f8b66;
+  --error: #c94e4e;
+  --warning: #d89a35;
+
+  --shadow-soft: 0 10px 30px rgba(91, 35, 49, 0.08);
+  --shadow-card: 0 8px 24px rgba(64, 27, 38, 0.07);
 
   /* Semantic surface tokens (light) */
-  --background: var(--cream);
+  --background: #fffdfb;
   --foreground: var(--charcoal);
   --card: #ffffff;
   --card-foreground: var(--charcoal);
@@ -35,14 +41,14 @@
   --primary-foreground: var(--cream);
   --secondary: var(--blush);
   --secondary-foreground: var(--berry-dark);
-  --muted: #f2e9de;
-  --muted-foreground: #7a6f66;
+  --muted: var(--surface-soft);
+  --muted-foreground: #705c62;
   --accent: var(--gold);
   --accent-foreground: var(--charcoal);
   --destructive: var(--error);
   --destructive-foreground: #ffffff;
-  --border: #e9dccb;
-  --input: #e9dccb;
+  --border: #eadfe1;
+  --input: #eadfe1;
   --ring: var(--gold);
 }
 
@@ -69,7 +75,7 @@
 }
 
 @theme inline {
-  --font-display: var(--font-playfair);
+  --font-display: var(--font-cormorant);
   --font-sans: var(--font-inter);
 
   --color-background: var(--background);
@@ -93,10 +99,12 @@
   --color-ring: var(--ring);
 
   --color-berry: var(--berry);
+  --color-berry-hover: var(--berry-hover);
   --color-berry-dark: var(--berry-dark);
   --color-berry-light: var(--berry-light);
   --color-cream: var(--cream);
   --color-blush: var(--blush);
+  --color-surface-soft: var(--surface-soft);
   --color-chocolate: var(--chocolate);
   --color-gold: var(--gold);
   --color-gold-light: var(--gold-light);
@@ -105,6 +113,8 @@
   --color-error: var(--error);
   --color-warning: var(--warning);
 
+  /* Radius scale tuned to the Option 1 spec: buttons 8px, product images
+     12px, cards 16px, dashboard cards 14px, main panels 24px. */
   --radius-sm: calc(var(--radius) - 0.5rem);
   --radius-md: calc(var(--radius) - 0.25rem);
   --radius-lg: var(--radius);
