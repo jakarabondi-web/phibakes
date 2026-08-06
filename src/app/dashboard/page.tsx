@@ -1,16 +1,9 @@
 import Link from "next/link";
-import {
-  ClipboardList,
-  Wallet,
-  PiggyBank,
-  ChefHat,
-  Truck,
-  MessageSquareText,
-  Boxes,
-  ArrowRight,
-} from "lucide-react";
+import { ClipboardList, Wallet, PiggyBank, ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+import { TopCakes } from "@/components/dashboard/top-cakes";
+import { ProductionCalendarWidget } from "@/components/dashboard/production-calendar-widget";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +12,7 @@ import { SalesTrendChart } from "@/components/dashboard/charts/sales-trend-chart
 import { OrdersStatusChart } from "@/components/dashboard/charts/orders-status-chart";
 import { RevenueCategoryChart } from "@/components/dashboard/charts/revenue-category-chart";
 import { CustomerGrowthChart } from "@/components/dashboard/charts/customer-growth-chart";
+import { OrdersOverviewChart } from "@/components/dashboard/charts/orders-overview-chart";
 import { formatKes, formatDate } from "@/lib/utils";
 import { STATUS_BADGE } from "@/components/dashboard/status-badge";
 import {
@@ -29,6 +23,8 @@ import {
   getCustomerGrowth,
   getTodaysProduction,
   getUpcomingDeliveries,
+  getOrdersOverviewSeries,
+  REFERENCE_DATE,
 } from "@/lib/dashboard-data";
 
 export const metadata = { title: "Overview" };
@@ -41,12 +37,13 @@ export default function DashboardOverviewPage() {
   const growth = getCustomerGrowth();
   const todaysProduction = getTodaysProduction();
   const upcomingDeliveries = getUpcomingDeliveries();
+  const ordersOverview = getOrdersOverviewSeries(14);
 
   return (
     <div>
       <PageHeader
         title="Overview"
-        description="Wednesday, 6 August 2026 — here's how the bakery is doing today."
+        description={`${formatDate(REFERENCE_DATE, { weekday: "long", day: "numeric", month: "long", year: "numeric" })} — here's how the bakery is doing today.`}
         actions={
           <Button asChild>
             <Link href="/dashboard/orders">
@@ -58,27 +55,32 @@ export default function DashboardOverviewPage() {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <KpiCard label="Today's Orders" value={String(stats.todaysOrders)} icon={ClipboardList} delta={12} />
-        <KpiCard label="Revenue (Aug)" value={formatKes(stats.revenueThisMonth)} icon={Wallet} delta={8} />
-        <KpiCard label="Deposits Collected" value={formatKes(stats.depositsCollected)} icon={PiggyBank} delta={5} />
+        <KpiCard label="Revenue" value={formatKes(stats.revenueThisMonth)} icon={Wallet} delta={8.4} />
+        <KpiCard label="Deposits" value={formatKes(stats.depositsCollected)} icon={PiggyBank} delta={10.2} />
         <KpiCard
-          label="Outstanding Balance"
+          label="Outstanding"
           value={formatKes(stats.outstandingBalance)}
           icon={Wallet}
           tone="warning"
-          delta={-3}
-        />
-        <KpiCard label="Orders in Production" value={String(stats.ordersInProduction)} icon={ChefHat} />
-        <KpiCard label="Deliveries Today" value={String(stats.deliveriesToday)} icon={Truck} />
-        <KpiCard label="Unread Messages" value={String(stats.unreadMessages)} icon={MessageSquareText} />
-        <KpiCard
-          label="Inventory Alerts"
-          value={`${stats.inventoryAlerts}`}
-          icon={Boxes}
-          tone="destructive"
+          delta={-5.4}
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <Card className="gap-4 rounded-[var(--radius-dashboard)] p-5 xl:col-span-1">
+          <div>
+            <p className="font-display text-lg font-semibold leading-tight">Orders Overview</p>
+            <p className="text-sm text-muted-foreground">Placed vs. delivered, last 14 days</p>
+          </div>
+          <OrdersOverviewChart data={ordersOverview} />
+        </Card>
+        <TopCakes />
+        <ProductionCalendarWidget />
+      </div>
+
+      <h2 className="mt-8 mb-4 font-display text-xl font-semibold text-foreground">More Insights</h2>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card className="p-5">
           <CardHeader className="p-0">
             <CardTitle>Sales Trend</CardTitle>

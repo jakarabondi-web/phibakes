@@ -11,19 +11,21 @@ import { Button } from "@/components/ui/button";
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <Link href="/dashboard" className="flex items-center gap-2.5 px-1">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold text-charcoal font-display text-base font-bold">
-        P
-      </span>
-      {!collapsed && (
-        <span className="font-display text-lg font-bold leading-none text-foreground">
-          PhiBakes
-          <span className="block text-[10px] font-sans font-medium tracking-widest text-muted-foreground">
-            OWNER CONSOLE
-          </span>
+    <div className={cn("bg-primary", collapsed ? "px-2 py-4" : "px-4 py-5")}>
+      <Link href="/dashboard" className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold text-charcoal font-display text-base font-bold">
+          P
         </span>
-      )}
-    </Link>
+        {!collapsed && (
+          <span className="font-display text-lg font-bold leading-none text-primary-foreground">
+            PhiBakes
+            <span className="block text-[10px] font-sans font-medium tracking-widest text-primary-foreground/70">
+              OWNER CONSOLE
+            </span>
+          </span>
+        )}
+      </Link>
+    </div>
   );
 }
 
@@ -50,10 +52,10 @@ function NavLinks({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?:
                   onClick={onNavigate}
                   title={collapsed ? item.label : undefined}
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "group relative flex items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2 text-sm font-medium transition-colors",
                     collapsed && "justify-center px-2",
                     active
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "border-primary bg-blush text-primary"
                       : "text-foreground/80 hover:bg-secondary hover:text-foreground"
                   )}
                 >
@@ -79,13 +81,11 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 lg:flex",
+        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-background transition-[width] duration-200 lg:flex",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b border-border px-3">
-        <Brand collapsed={collapsed} />
-      </div>
+      <Brand collapsed={collapsed} />
       <NavLinks collapsed={collapsed} />
       <div className="border-t border-border p-2">
         <Button
@@ -111,7 +111,7 @@ export function DashboardMobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0">
-        <SheetHeader className="h-16 justify-center border-b border-border">
+        <SheetHeader className="justify-center p-0">
           <SheetTitle asChild>
             <Brand />
           </SheetTitle>

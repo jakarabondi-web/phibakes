@@ -20,7 +20,7 @@ export function KpiCard({
 }) {
   const positive = (delta ?? 0) >= 0;
   return (
-    <Card className="gap-3 p-5">
+    <Card className="gap-3 rounded-[var(--radius-dashboard)] p-5">
       <div className="flex items-start justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
         <div
@@ -36,7 +36,7 @@ export function KpiCard({
           <Icon className="size-4.5" />
         </div>
       </div>
-      <p className="font-display text-2xl font-bold text-foreground sm:text-[1.75rem]">{value}</p>
+      <p className="font-sans text-2xl font-bold tabular-nums text-foreground sm:text-[1.75rem]">{value}</p>
       {typeof delta === "number" && (
         <p
           className={cn(

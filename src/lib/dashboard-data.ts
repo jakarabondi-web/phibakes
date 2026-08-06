@@ -187,6 +187,27 @@ export function getMonthlyGrowth() {
   });
 }
 
+// Two-series (placed vs. delivered) daily data for the dashboard's "Orders
+// Overview" chart, derived from the real ORDERS array — no synthetic noise.
+export function getOrdersOverviewSeries(days = 14) {
+  const end = new Date(REFERENCE_DATE);
+  return Array.from({ length: days }).map((_, i) => {
+    const d = new Date(end);
+    d.setDate(d.getDate() - (days - 1 - i));
+    const dayISO = d.toISOString();
+    const placed = ORDERS.filter((o) => sameDay(o.createdAt, dayISO)).length;
+    const delivered = ORDERS.filter(
+      (o) => (o.status === "Delivered" || o.status === "Completed") && sameDay(o.eventDate, dayISO)
+    ).length;
+    return {
+      date: d.toISOString().slice(0, 10),
+      label: d.toLocaleDateString("en-KE", { day: "numeric", month: "short" }),
+      orders: placed,
+      delivered,
+    };
+  });
+}
+
 export function getPopularCakes(limit = 6) {
   const counts = new Map<string, number>();
   for (const o of ORDERS) {

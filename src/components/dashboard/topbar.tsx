@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DashboardMobileNav } from "@/components/dashboard/sidebar";
 import { AVATAR_IMAGES } from "@/lib/data/images";
+import { REFERENCE_DATE } from "@/lib/dashboard-data";
+import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 const NOTIFICATIONS = [
@@ -47,7 +49,11 @@ export function DashboardTopbar() {
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-1.5">
+      <p className="ml-auto hidden text-sm font-medium text-muted-foreground md:block">
+        {formatDate(REFERENCE_DATE, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+      </p>
+
+      <div className="flex items-center gap-1.5">
         <Button
           variant="ghost"
           size="icon"
@@ -84,15 +90,18 @@ export function DashboardTopbar() {
             <button className="ml-1 flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 hover:bg-secondary">
               <Avatar className="size-7">
                 <AvatarImage src={AVATAR_IMAGES[0]} alt="Owner" />
-                <AvatarFallback>PB</AvatarFallback>
+                <AvatarFallback>PM</AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm font-medium sm:inline">Phibeon Bakes</span>
+              <span className="hidden flex-col items-start leading-tight sm:flex">
+                <span className="text-sm font-medium">Phoina Mwangis</span>
+                <span className="text-[11px] text-muted-foreground">Owner</span>
+              </span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <p className="text-sm font-medium">Phibeon Bakes</p>
-              <p className="text-xs font-normal text-muted-foreground">owner@phibakes.co.ke</p>
+              <p className="text-sm font-medium">Phoina Mwangis</p>
+              <p className="text-xs font-normal text-muted-foreground">Owner · owner@phibakes.co.ke</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

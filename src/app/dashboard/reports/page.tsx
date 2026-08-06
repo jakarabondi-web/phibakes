@@ -78,7 +78,7 @@ export default function ReportsPage() {
             </div>
           </CardHeader>
           <div className="flex flex-1 items-center gap-6">
-            <p className="font-display text-4xl font-bold text-primary">{summary.repeatCustomerRate}%</p>
+            <p className="font-sans text-4xl font-bold tabular-nums text-primary">{summary.repeatCustomerRate}%</p>
             <p className="text-sm text-muted-foreground">
               {summary.repeatCustomers} of the tracked customer base has ordered more than once —
               a strong signal of loyalty for a premium cake studio.
