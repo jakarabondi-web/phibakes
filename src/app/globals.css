@@ -1,0 +1,208 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------- */
+/* PhiBakes Design Tokens                                                  */
+/* ---------------------------------------------------------------------- */
+
+:root {
+  --radius: 1rem;
+  --radius-dashboard: 0.875rem;
+
+  /* Brand palette — "Elegant & Warm" (Option 1) */
+  --berry: #71152d;
+  --berry-hover: #5f1025;
+  --berry-dark: #4b0d1e;
+  --berry-light: #8b3046;
+  --cream: #fff8f0;
+  --blush: #f7e8ea;
+  --surface-soft: #fbf3f3;
+  --chocolate: #4a3028;
+  --gold: #c99a67;
+  --gold-light: #ead4bc;
+  --charcoal: #32151d;
+  --success: #3f8b66;
+  --error: #c94e4e;
+  --warning: #d89a35;
+
+  --shadow-soft: 0 10px 30px rgba(91, 35, 49, 0.08);
+  --shadow-card: 0 8px 24px rgba(64, 27, 38, 0.07);
+
+  /* Semantic surface tokens (light) */
+  --background: #fffdfb;
+  --foreground: var(--charcoal);
+  --card: #ffffff;
+  --card-foreground: var(--charcoal);
+  --popover: #ffffff;
+  --popover-foreground: var(--charcoal);
+  --primary: var(--berry);
+  --primary-foreground: var(--cream);
+  --secondary: var(--blush);
+  --secondary-foreground: var(--berry-dark);
+  --muted: var(--surface-soft);
+  --muted-foreground: #705c62;
+  --accent: var(--gold);
+  --accent-foreground: var(--charcoal);
+  --destructive: var(--error);
+  --destructive-foreground: #ffffff;
+  --border: #eadfe1;
+  --input: #eadfe1;
+  --ring: var(--gold);
+}
+
+.dark {
+  --background: #1a1518;
+  --foreground: #f5ece2;
+  --card: #221b1f;
+  --card-foreground: #f5ece2;
+  --popover: #221b1f;
+  --popover-foreground: #f5ece2;
+  --primary: #c98bab;
+  --primary-foreground: #2b1420;
+  --secondary: #33262c;
+  --secondary-foreground: #f0d7e2;
+  --muted: #2a2226;
+  --muted-foreground: #b3a49a;
+  --accent: var(--gold);
+  --accent-foreground: #1a1518;
+  --destructive: #e6675a;
+  --destructive-foreground: #1a1518;
+  --border: #372c31;
+  --input: #372c31;
+  --ring: var(--gold);
+}
+
+@theme inline {
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-berry: var(--berry);
+  --color-berry-hover: var(--berry-hover);
+  --color-berry-dark: var(--berry-dark);
+  --color-berry-light: var(--berry-light);
+  --color-cream: var(--cream);
+  --color-blush: var(--blush);
+  --color-surface-soft: var(--surface-soft);
+  --color-chocolate: var(--chocolate);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-charcoal: var(--charcoal);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+
+  /* Radius scale tuned to the Option 1 spec: buttons 8px, product images
+     12px, cards 16px, dashboard cards 14px, main panels 24px. */
+  --radius-sm: calc(var(--radius) - 0.5rem);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+  --radius-2xl: calc(var(--radius) + 1rem);
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-shimmer: shimmer 2.2s linear infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+  }
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-charcoal);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .container-luxe {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .container-luxe {
+      padding-inline: 2.5rem;
+    }
+  }
+  .bg-noise {
+    background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .shimmer-bg {
+    background: linear-gradient(90deg, var(--color-muted) 25%, #eee2d1 37%, var(--color-muted) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 2.2s ease-in-out infinite;
+  }
+}
