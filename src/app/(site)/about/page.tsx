@@ -88,7 +88,7 @@ export default function AboutPage() {
             </Badge>
             <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.08] text-foreground sm:text-5xl">
               A Nairobi kitchen table, grown into a{" "}
-              <span className="text-berry">premium cake studio.</span>
+              <span className="italic text-berry">premium cake studio.</span>
             </h1>
             <p className="mt-6 max-w-lg text-balance text-lg leading-relaxed text-muted-foreground">
               PhiBakes began in 2017 in a small Kilimani kitchen, baking birthday cakes for
@@ -111,7 +111,7 @@ export default function AboutPage() {
               src={cakeImage(4)}
               alt="A PhiBakes signature cake in the studio"
               fill
-              priority
+              preload
               sizes="(min-width: 1024px) 45vw, 90vw"
               className="object-cover"
             />

@@ -86,7 +86,7 @@ function TrackOrderContent() {
           Order Tracker
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-foreground sm:text-4xl">
-          Track Your Cake
+          Track Your <span className="italic text-berry">Cake</span>
         </h1>
         <p className="mx-auto mt-2 max-w-lg text-balance text-muted-foreground">
           Enter your order code to see live progress — from confirmation to delivery.

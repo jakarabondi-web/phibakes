@@ -24,7 +24,7 @@ function ConfirmationContent() {
             <CheckCircle2 className="size-8" />
           </div>
           <h1 className="mt-6 font-display text-3xl font-bold text-foreground sm:text-4xl">
-            Order Confirmed!
+            Order <span className="italic text-berry">Confirmed!</span>
           </h1>
           <p className="mt-3 text-balance text-muted-foreground">
             Thank you — we&apos;ve received your payment and your order is now in our production

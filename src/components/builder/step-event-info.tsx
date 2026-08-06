@@ -26,10 +26,12 @@ export function StepEventInfo({
         Tell us when and where your celebration is happening.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,320px)_1fr]">
+      <div className="mt-8 flex flex-col gap-8">
         <div>
           <Label className="mb-3">Event date</Label>
-          <EventCalendar value={value.date} onChange={(date) => onChange({ ...value, date })} />
+          <div className="max-w-sm">
+            <EventCalendar value={value.date} onChange={(date) => onChange({ ...value, date })} />
+          </div>
           {value.date && availability && (
             <p className="mt-3 text-xs text-muted-foreground">
               {formatDate(value.date)} — {availability.remaining} of {availability.capacity} production

@@ -122,7 +122,7 @@ export function StepQuote({ state }: { state: BuilderState }) {
         send it to our team for a bespoke manual quote.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="mt-8 flex flex-col gap-8">
         <div>
           <Card className="gap-4 p-6 py-6">
             <p className="px-0 font-display text-sm font-semibold text-berry">Price breakdown</p>
@@ -133,14 +133,14 @@ export function StepQuote({ state }: { state: BuilderState }) {
                 </p>
               )}
               {breakdown.lines.map((line) => (
-                <div key={line.label} className="flex items-center justify-between text-sm">
+                <div key={line.label} className="flex items-baseline justify-between gap-3 text-sm">
                   <span className="text-muted-foreground">{line.label}</span>
-                  <span className="font-medium text-foreground">{formatKes(line.amount)}</span>
+                  <span className="shrink-0 font-medium text-foreground">{formatKes(line.amount)}</span>
                 </div>
               ))}
             </div>
             <Separator className="mx-0 w-auto" />
-            <div className="flex items-center justify-between px-0">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-0">
               <span className="font-display text-lg font-semibold text-foreground">
                 Estimated total
               </span>

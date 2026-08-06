@@ -111,7 +111,7 @@ export default function TermsPage() {
             <FileText className="size-3.5" /> Legal
           </Badge>
           <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-            Terms of Service
+            Terms of <span className="italic text-berry">Service</span>
           </h1>
           <p className="mt-4 text-sm text-muted-foreground">Effective date: 1 January 2026</p>
         </div>

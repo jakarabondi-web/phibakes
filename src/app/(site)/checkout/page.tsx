@@ -222,7 +222,7 @@ export default function CheckoutPage() {
           Secure Checkout
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-foreground sm:text-4xl">
-          Complete Your Order
+          Complete Your <span className="italic text-berry">Order</span>
         </h1>
         <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
           <ShieldCheck className="size-4 text-berry" />

@@ -23,7 +23,7 @@ export default function CakesPage() {
               <Sparkles className="size-3.5" /> The Full Collection
             </Badge>
             <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.08] text-foreground sm:text-5xl">
-              Shop All <span className="text-berry">Cakes</span>
+              Shop All <span className="italic text-berry">Cakes</span>
             </h1>
             <p className="mt-6 max-w-lg text-balance text-lg leading-relaxed text-muted-foreground">
               Every cake is handcrafted to order in our Kilimani studio — from same-day treats to
@@ -38,7 +38,7 @@ export default function CakesPage() {
               fill
               sizes="45vw"
               className="object-cover"
-              priority
+              preload
             />
           </div>
         </div>

@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
               <span className="font-display text-2xl font-bold text-foreground">PhiBakes</span>
             </Link>
             <h1 className="mt-6 text-balance font-display text-2xl font-bold text-foreground sm:text-3xl">
-              Reset your password
+              Reset your <span className="italic text-berry">password</span>
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Enter your email and we&apos;ll send you a link to reset your password.

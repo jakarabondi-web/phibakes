@@ -23,7 +23,7 @@ export default function LoginPage() {
               <span className="font-display text-2xl font-bold text-foreground">PhiBakes</span>
             </Link>
             <h1 className="mt-6 text-balance font-display text-2xl font-bold text-foreground sm:text-3xl">
-              Welcome back
+              Welcome <span className="italic text-berry">back</span>
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Sign in to track your orders and manage your account.
