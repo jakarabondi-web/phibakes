@@ -34,7 +34,7 @@ export function CategoryGrid() {
       <div className="container-luxe">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
-            Popular Categories
+            Popular <span className="italic text-berry">Categories</span>
           </h2>
           <Link
             href="/cakes"

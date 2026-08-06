@@ -13,6 +13,7 @@ export function InstagramGallery() {
           align="center"
           eyebrow="@phibakes"
           title="Follow @PhiBakes"
+          accent="Follow"
           description="Our latest creations, fresh from the studio."
           className="mx-auto"
         />

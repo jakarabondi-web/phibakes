@@ -34,7 +34,7 @@ export function HowItWorks() {
       <div className="container-luxe">
         <div className="rounded-xl bg-primary px-6 py-14 text-primary-foreground sm:px-10 sm:py-16 lg:py-[4.5rem]">
           <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">
-            How it works
+            How it <span className="italic text-gold">works</span>
           </h2>
 
           <div className="relative mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-4">

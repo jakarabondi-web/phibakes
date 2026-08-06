@@ -24,6 +24,7 @@ export function ReadyToday() {
         <SectionHeading
           eyebrow="Same-Day Pickup"
           title="Ready Today"
+          accent="Today"
           description={category?.description}
         />
         <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">

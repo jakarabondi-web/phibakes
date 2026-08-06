@@ -20,6 +20,7 @@ export function Testimonials() {
           align="center"
           eyebrow="Testimonials"
           title="What Our Customers Say"
+          accent="Say"
           className="mx-auto"
         />
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">

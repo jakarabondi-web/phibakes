@@ -98,7 +98,7 @@ export function FeaturedCakes() {
     <section className="py-16 sm:py-20">
       <div className="container-luxe">
         <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
-          Featured Cakes
+          Featured <span className="italic text-berry">Cakes</span>
         </h2>
 
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

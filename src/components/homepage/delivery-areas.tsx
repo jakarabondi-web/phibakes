@@ -21,7 +21,7 @@ export function DeliveryAreas() {
       <div className="container-luxe">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <SectionHeading eyebrow="Delivery" title="We Deliver Across Nairobi" />
+            <SectionHeading eyebrow="Delivery" title="We Deliver Across Nairobi" accent="Nairobi" />
             <div className="mt-8 flex flex-wrap gap-3">
               {DELIVERY_AREAS.map((area) => (
                 <span

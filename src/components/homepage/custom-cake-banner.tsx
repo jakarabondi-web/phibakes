@@ -41,7 +41,7 @@ export function CustomCakeBanner() {
 
           <div className="order-1 text-center lg:order-2 lg:text-left">
             <h2 className="text-balance font-display text-3xl font-bold text-foreground sm:text-4xl">
-              Made especially for you
+              Made <span className="italic text-berry">especially</span> for you
             </h2>
             <p className="mx-auto mt-4 max-w-md text-balance leading-relaxed text-muted-foreground lg:mx-0">
               Share your ideas and we&apos;ll create a cake that&apos;s uniquely yours. Any theme,

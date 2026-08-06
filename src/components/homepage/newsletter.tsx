@@ -24,7 +24,7 @@ export function Newsletter() {
       <div className="container-luxe">
         <div className="rounded-[24px] bg-blush px-6 py-14 text-center sm:px-12">
           <h2 className="text-balance font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl">
-            Stay Sweet. Stay Updated.
+            <span className="italic text-berry">Stay Sweet.</span> Stay Updated.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-balance text-sm leading-relaxed text-muted-foreground">
             Subscribe for new cake drops, offers and inspiration.
