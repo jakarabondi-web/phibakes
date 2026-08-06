@@ -28,7 +28,7 @@ export function RevenueCategoryChart({ data }: { data: { category: string; reven
         <Tooltip
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
           cursor={{ fill: "var(--muted)" }}
-          formatter={(value: number) => [formatKes(value), "Revenue"]}
+          formatter={(value) => [formatKes(Number(value)), "Revenue"]}
         />
         <Bar dataKey="revenue" fill="#C69A5B" radius={[6, 6, 0, 0]} barSize={32} />
       </BarChart>

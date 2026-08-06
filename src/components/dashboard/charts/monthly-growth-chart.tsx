@@ -19,7 +19,7 @@ export function MonthlyGrowthChart({ data }: { data: { month: string; revenue: n
         <Tooltip
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
           cursor={{ fill: "var(--muted)" }}
-          formatter={(value: number) => [formatKes(value), "Revenue"]}
+          formatter={(value) => [formatKes(Number(value)), "Revenue"]}
         />
         <Bar dataKey="revenue" fill="#7A294B" radius={[6, 6, 0, 0]} barSize={36} />
       </BarChart>

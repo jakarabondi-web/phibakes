@@ -36,7 +36,7 @@ export function SalesTrendChart({ data }: { data: { label: string; revenue: numb
             fontSize: 12,
           }}
           labelStyle={{ color: "var(--foreground)", fontWeight: 600 }}
-          formatter={(value: number) => [formatKes(value), "Revenue"]}
+          formatter={(value) => [formatKes(Number(value)), "Revenue"]}
         />
         <Area type="monotone" dataKey="revenue" stroke="#7A294B" strokeWidth={2} fill="url(#salesFill)" />
       </AreaChart>

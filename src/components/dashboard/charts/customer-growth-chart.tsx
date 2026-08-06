@@ -22,7 +22,7 @@ export function CustomerGrowthChart({ data }: { data: { month: string; customers
         />
         <Tooltip
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
-          formatter={(value: number) => [value, "Customers"]}
+          formatter={(value) => [Number(value), "Customers"]}
         />
         <Line type="monotone" dataKey="customers" stroke="#4A3028" strokeWidth={2.5} dot={{ r: 3 }} />
       </LineChart>

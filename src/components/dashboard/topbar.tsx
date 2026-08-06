@@ -29,6 +29,7 @@ const NOTIFICATIONS = [
 export function DashboardTopbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- standard next-themes hydration guard
   React.useEffect(() => setMounted(true), []);
 
   return (
