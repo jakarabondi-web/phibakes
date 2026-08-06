@@ -3,123 +3,174 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag, User, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Menu, X, ShoppingBag, UserRound, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
 
 const NAV_LINKS = [
   { label: "Cakes", href: "/cakes" },
-  { label: "Custom Cakes", href: "/custom-cake-builder" },
-  { label: "Occasions", href: "/cakes" },
+  { label: "Custom", href: "/custom-cake-builder" },
+  { label: "Occasions", href: "/gallery" },
   { label: "Ready Today", href: "/cakes/ready-today" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
 
-function Wordmark({ className }: { className?: string }) {
+function Wordmark() {
   return (
-    <span className={cn("font-display text-2xl font-semibold text-primary", className)}>
+    <Link
+      href="/"
+      className="whitespace-nowrap font-display text-xl font-semibold text-primary"
+    >
       <span className="italic">Phi</span>
       <span className="not-italic">Bakes</span>
-    </span>
+    </Link>
   );
 }
 
+/**
+ * Floating "glass pill" header (menu Option 3). The pill hovers over the
+ * page with a backdrop blur; on mobile the hamburger drops a rounded menu
+ * card beneath the pill instead of a full-screen drawer.
+ */
 export function SiteHeader() {
   const pathname = usePathname();
   const { itemCount } = useCart();
+  const [open, setOpen] = React.useState(false);
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  const isActive = React.useCallback(
+    (href: string) =>
+      href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`),
+    [pathname]
+  );
+
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- close the menu card on navigation
+    setOpen(false);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onClick = (e: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("mousedown", onClick);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("mousedown", onClick);
+    };
+  }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-cream/95 backdrop-blur-sm">
-      <div className="container-luxe grid h-[76px] grid-cols-[auto_1fr_auto] items-center gap-4">
-        <Link href="/" className="flex shrink-0 items-center">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <div className="relative mx-auto max-w-6xl">
+        <div className="flex items-center justify-between gap-3 rounded-full border border-border/80 bg-background/80 py-2 pl-5 pr-2 shadow-[0_10px_30px_rgba(91,35,49,0.10)] backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
           <Wordmark />
-        </Link>
 
-        <nav className="hidden lg:flex items-center justify-center gap-1">
-          {NAV_LINKS.map((link, i) => (
+          <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                  isActive(link.href)
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground/80 hover:bg-blush hover:text-primary"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-1">
             <Link
-              key={`${link.href}-${i}`}
-              href={link.href}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:text-primary",
-                pathname === link.href && "text-primary font-semibold"
-              )}
+              href="/account"
+              aria-label="Account"
+              className="hidden size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-blush hover:text-primary sm:inline-flex"
             >
-              {link.label}
+              <UserRound className="size-[19px]" strokeWidth={1.8} />
             </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center justify-end gap-1">
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label="Search">
-            <Search />
-          </Button>
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label="Account" asChild>
-            <Link href="/account">
-              <User />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" className="relative" aria-label="Cart" asChild>
-            <Link href="/cart">
-              <ShoppingBag />
+            <Link
+              href="/cart"
+              aria-label={`Cart${itemCount > 0 ? ` (${itemCount} items)` : ""}`}
+              className="relative inline-flex size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-blush hover:text-primary"
+            >
+              <ShoppingBag className="size-[19px]" strokeWidth={1.8} />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-charcoal">
+                <span className="absolute right-0.5 top-0.5 flex size-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-charcoal">
                   {itemCount}
                 </span>
               )}
             </Link>
-          </Button>
+            <Link
+              href="/cakes"
+              className="hidden items-center gap-1.5 rounded-full bg-gold px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-charcoal transition-shadow hover:shadow-md md:inline-flex"
+            >
+              Order a Cake
+            </Link>
+            <button
+              type="button"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+              className="inline-flex size-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-blush lg:hidden"
+            >
+              {open ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
+          </div>
+        </div>
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Menu">
-                <Menu />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-sm bg-cream">
-              <SheetHeader>
-                <SheetTitle>
-                  <Wordmark />
-                </SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col gap-1 px-6">
-                {NAV_LINKS.map((link, i) => (
-                  <Link
-                    key={`${link.href}-${i}`}
-                    href={link.href}
-                    className={cn(
-                      "rounded-xl px-3 py-3 text-base font-medium text-foreground hover:bg-secondary hover:text-primary",
-                      pathname === link.href && "bg-secondary text-primary"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="my-2 h-px bg-border" />
-                <Link
-                  href="/account"
-                  className="rounded-xl px-3 py-3 text-base font-medium hover:bg-secondary hover:text-primary"
-                >
-                  My Account
-                </Link>
-                <Link
-                  href="/login"
-                  className="rounded-xl px-3 py-3 text-base font-medium hover:bg-secondary hover:text-primary"
-                >
-                  Sign In
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
+        {/* Mobile dropdown card */}
+        <div
+          ref={cardRef}
+          className={cn(
+            "absolute inset-x-0 top-full z-50 mt-2 origin-top rounded-3xl border border-border bg-background p-2.5 shadow-[0_18px_44px_rgba(91,35,49,0.18)] transition-all duration-200 lg:hidden",
+            open
+              ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+              : "pointer-events-none -translate-y-2 scale-[0.98] opacity-0"
+          )}
+        >
+          <nav className="flex flex-col" aria-label="Mobile">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex min-h-11 items-center justify-between rounded-2xl px-4 py-3 text-[0.95rem] font-medium",
+                  isActive(link.href)
+                    ? "bg-blush font-semibold text-primary"
+                    : "text-foreground hover:bg-cream"
+                )}
+              >
+                {link.label}
+                <ArrowRight className="size-4 text-gold" />
+              </Link>
+            ))}
+          </nav>
+          <div className="mt-1.5 flex gap-2 px-1 pb-1">
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="flex min-h-11 flex-1 items-center justify-center rounded-2xl border border-border bg-cream text-xs font-semibold uppercase tracking-wide text-primary"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/cakes"
+              onClick={() => setOpen(false)}
+              className="flex min-h-11 flex-1 items-center justify-center rounded-2xl bg-primary text-xs font-semibold uppercase tracking-wide text-primary-foreground"
+            >
+              Order a Cake
+            </Link>
+          </div>
         </div>
       </div>
     </header>
