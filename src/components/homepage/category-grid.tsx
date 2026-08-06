@@ -15,6 +15,17 @@ const FEATURED_SLUGS: CakeCategorySlug[] = [
   "desserts",
 ];
 
+// High-resolution category photography from the Option 1 asset pack
+// (1200×900 source files), keyed by category slug.
+const CATEGORY_IMAGES: Record<string, string> = {
+  birthday: "/images/categories/birthday-cake.png",
+  wedding: "/images/categories/wedding-cake.png",
+  graduation: "/images/categories/graduation-cake.png",
+  corporate: "/images/categories/corporate-cake.png",
+  cupcakes: "/images/categories/cupcakes.png",
+  desserts: "/images/categories/desserts.png",
+};
+
 export function CategoryGrid() {
   const categories = FEATURED_SLUGS.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter(
     (c): c is NonNullable<typeof c> => Boolean(c)
@@ -44,7 +55,7 @@ export function CategoryGrid() {
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                 <Image
-                  src={cat.image}
+                  src={CATEGORY_IMAGES[cat.slug] ?? cat.image}
                   alt={cat.name}
                   fill
                   sizes="(min-width: 1024px) 16vw, (min-width: 640px) 30vw, 45vw"

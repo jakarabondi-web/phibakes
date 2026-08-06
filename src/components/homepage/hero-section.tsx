@@ -32,10 +32,10 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-[0_24px_60px_-16px_rgba(74,27,38,0.28)] ring-1 ring-black/5 lg:aspect-auto lg:h-full lg:min-h-[420px]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-[0_24px_60px_-16px_rgba(74,27,38,0.28)] ring-1 ring-black/5 lg:aspect-auto lg:h-full lg:min-h-[420px]">
           <Image
             src="/images/hero/hero-cake-scene.png"
-            alt="Elegant white celebration cake with burgundy roses and a gold drip, by PhiBakes"
+            alt="Two-tier white celebration cake with burgundy roses and a gold drip, by PhiBakes"
             fill
             priority
             sizes="(min-width: 1024px) 50vw, 90vw"
