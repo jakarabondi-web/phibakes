@@ -21,6 +21,7 @@ export function StepQuote({ state }: { state: BuilderState }) {
     () => `PBQ-${Math.random().toString(36).slice(2, 6).toUpperCase()}${Date.now().toString().slice(-3)}`
   );
   const [copied, setCopied] = React.useState(false);
+  const cartItemIdRef = React.useRef(0);
 
   const breakdown = calculateQuote(state);
   const cakeName = `Custom ${state.occasion ?? "Celebration"} Cake${
@@ -28,8 +29,9 @@ export function StepQuote({ state }: { state: BuilderState }) {
   }`;
 
   function handleAddToCart() {
+    cartItemIdRef.current += 1;
     addItem({
-      id: `custom-${Math.random().toString(36).slice(2, 10)}`,
+      id: `custom-${refCode}-${cartItemIdRef.current}`,
       cakeId: "custom-cake",
       name: cakeName,
       image: cakeImage(3),

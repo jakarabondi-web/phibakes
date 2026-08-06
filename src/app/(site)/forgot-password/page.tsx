@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { LoginForm } from "./login-form";
-import { GoogleButton } from "./google-button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ForgotPasswordForm } from "./forgot-password-form";
 
 export const metadata: Metadata = {
-  title: "Sign In",
-  description: "Sign in to your PhiBakes account to track orders, save favourites, and check out faster.",
+  title: "Reset Password",
+  description: "Reset your PhiBakes account password.",
 };
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <section className="bg-noise">
       <div className="container-luxe flex min-h-[calc(100vh-20rem)] items-center justify-center py-16 sm:py-24">
@@ -23,31 +21,23 @@ export default function LoginPage() {
               <span className="font-display text-2xl font-bold text-foreground">PhiBakes</span>
             </Link>
             <h1 className="mt-6 text-balance font-display text-2xl font-bold text-foreground sm:text-3xl">
-              Welcome back
+              Reset your password
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Sign in to track your orders and manage your account.
+              Enter your email and we&apos;ll send you a link to reset your password.
             </p>
           </div>
 
           <Card className="p-2 sm:p-4">
-            <CardHeader className="pb-0">
-              <GoogleButton />
-              <div className="my-2 flex items-center gap-3">
-                <Separator className="flex-1" />
-                <span className="text-xs text-muted-foreground">or continue with email</span>
-                <Separator className="flex-1" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <LoginForm />
+            <CardContent className="pt-6">
+              <ForgotPasswordForm />
             </CardContent>
           </Card>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-berry hover:underline">
-              Create one
+            Remembered it after all?{" "}
+            <Link href="/login" className="font-semibold text-berry hover:underline">
+              Back to sign in
             </Link>
           </p>
         </div>
