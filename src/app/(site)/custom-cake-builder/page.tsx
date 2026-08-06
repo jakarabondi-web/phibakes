@@ -19,7 +19,7 @@ export default function CustomCakeBuilderPage() {
             <Sparkles className="size-3.5" /> Custom Cake Builder
           </Badge>
           <h1 className="mt-6 text-balance font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">
-            Design your <span className="text-berry">dream cake</span> in 8 easy steps
+            Design your <span className="italic text-berry">dream cake</span> in 8 easy steps
           </h1>
           <p className="mt-4 text-balance text-muted-foreground leading-relaxed">
             From occasion to decoration, build a cake that&apos;s entirely yours — with transparent,

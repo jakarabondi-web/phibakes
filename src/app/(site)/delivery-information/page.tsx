@@ -83,7 +83,7 @@ export default function DeliveryInformationPage() {
               <Bike className="size-3.5" /> Pickup &amp; Delivery
             </Badge>
             <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-              Getting your cake to you, safely and on time
+              Getting your cake to you, <span className="italic text-berry">safely and on time</span>
             </h1>
             <p className="mt-4 text-balance text-lg leading-relaxed text-muted-foreground">
               Collect from our Kilimani studio or have your cake delivered anywhere in Nairobi by

@@ -42,8 +42,8 @@ export function SiteFooter() {
   return (
     <footer className="mt-24 bg-primary text-primary-foreground">
       <div className="container-luxe py-16">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
-          <div>
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
+          <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center">
               <span className="font-display text-2xl font-semibold text-primary-foreground">
                 <span className="italic">Phi</span>
@@ -92,7 +92,7 @@ export function SiteFooter() {
                   <li key={`${link.href}-${i}`}>
                     <Link
                       href={link.href}
-                      className="text-sm text-primary-foreground/75 transition-colors hover:text-primary-foreground"
+                      className="inline-block py-1 -my-1 text-sm text-primary-foreground/75 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>
@@ -127,29 +127,38 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-6 border-t border-primary-foreground/15 pt-8 sm:flex-row">
-          <div className="flex items-center gap-2">
-            <span className="rounded-md border border-primary-foreground/20 px-2.5 py-1 text-xs font-semibold tracking-wide">
+        <div className="mt-14 flex flex-col items-center justify-between gap-6 border-t border-primary-foreground/15 pt-8 md:flex-row md:flex-wrap">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="whitespace-nowrap rounded-md border border-primary-foreground/20 px-2.5 py-1 text-xs font-semibold tracking-wide">
               M-PESA
             </span>
-            <span className="rounded-md border border-primary-foreground/20 px-2.5 py-1 text-xs font-semibold tracking-wide">
+            <span className="whitespace-nowrap rounded-md border border-primary-foreground/20 px-2.5 py-1 text-xs font-semibold tracking-wide">
               VISA
             </span>
-            <span className="rounded-md border border-primary-foreground/20 px-2.5 py-1 text-xs font-semibold tracking-wide">
+            <span className="whitespace-nowrap rounded-md border border-primary-foreground/20 px-2.5 py-1 text-xs font-semibold tracking-wide">
               MASTERCARD
             </span>
           </div>
-          <p className="text-xs text-primary-foreground/60">
+          <p className="text-center text-xs text-primary-foreground/60">
             © 2026 PhiBakes. All rights reserved.
           </p>
-          <div className="flex gap-5 text-xs">
-            <Link href="/privacy" className="text-primary-foreground/70 hover:text-primary-foreground">
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs">
+            <Link
+              href="/privacy"
+              className="whitespace-nowrap text-primary-foreground/70 hover:text-primary-foreground"
+            >
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-primary-foreground/70 hover:text-primary-foreground">
+            <Link
+              href="/terms"
+              className="whitespace-nowrap text-primary-foreground/70 hover:text-primary-foreground"
+            >
               Terms
             </Link>
-            <Link href="/terms" className="text-primary-foreground/70 hover:text-primary-foreground">
+            <Link
+              href="/terms"
+              className="whitespace-nowrap text-primary-foreground/70 hover:text-primary-foreground"
+            >
               Refund Policy
             </Link>
           </div>

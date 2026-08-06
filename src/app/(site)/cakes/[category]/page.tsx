@@ -60,7 +60,7 @@ export default async function CategoryPage({
               fill
               sizes="100vw"
               className="object-cover"
-              priority
+              preload
             />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/30 to-charcoal/10" />
           </div>

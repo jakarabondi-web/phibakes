@@ -71,7 +71,7 @@ export default function CartPage() {
           Your Selections
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-foreground sm:text-4xl">
-          Shopping Cart
+          Shopping <span className="italic text-berry">Cart</span>
         </h1>
         <p className="mt-2 text-muted-foreground">
           {items.length} {items.length === 1 ? "item" : "items"} ready for checkout
@@ -111,7 +111,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="rounded-full p-1.5 text-muted-foreground/70 transition-colors hover:bg-secondary hover:text-destructive"
+                    className="-m-1 rounded-full p-2.5 text-muted-foreground/70 transition-colors hover:bg-secondary hover:text-destructive"
                     aria-label={`Remove ${item.name}`}
                   >
                     <Trash2 className="size-4" />
@@ -124,7 +124,7 @@ export default function CartPage() {
                       type="button"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
-                      className="flex size-8 items-center justify-center rounded-full text-foreground transition-colors hover:bg-secondary disabled:opacity-40"
+                      className="flex size-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-secondary disabled:opacity-40"
                       aria-label="Decrease quantity"
                     >
                       <Minus className="size-3.5" />
@@ -135,7 +135,7 @@ export default function CartPage() {
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="flex size-8 items-center justify-center rounded-full text-foreground transition-colors hover:bg-secondary"
+                      className="flex size-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-secondary"
                       aria-label="Increase quantity"
                     >
                       <Plus className="size-3.5" />

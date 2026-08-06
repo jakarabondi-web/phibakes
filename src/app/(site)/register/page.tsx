@@ -23,7 +23,7 @@ export default function RegisterPage() {
               <span className="font-display text-2xl font-bold text-foreground">PhiBakes</span>
             </Link>
             <h1 className="mt-6 text-balance font-display text-2xl font-bold text-foreground sm:text-3xl">
-              Create your account
+              Create your <span className="italic text-berry">account</span>
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Order, track, and manage your cakes in one place.

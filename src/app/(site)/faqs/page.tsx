@@ -122,7 +122,7 @@ export default function FaqsPage() {
             <HelpCircle className="size-3.5" /> Help Centre
           </Badge>
           <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-            Frequently asked questions
+            Frequently asked <span className="italic text-berry">questions</span>
           </h1>
           <p className="mt-4 text-balance text-lg leading-relaxed text-muted-foreground">
             Everything you need to know about ordering, paying, and receiving your PhiBakes cake.

@@ -52,7 +52,7 @@ export function CakeCard({ cake, className }: { cake: Cake; className?: string }
             {cake.name}
           </h3>
         </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <Star className="size-3.5 fill-gold text-gold" />
           <span className="font-medium text-foreground">{cake.rating.toFixed(1)}</span>
           <span>({cake.reviewCount})</span>
@@ -60,8 +60,8 @@ export function CakeCard({ cake, className }: { cake: Cake; className?: string }
           <Users className="size-3.5" />
           <span>{cake.servings.split(" ")[0]}</span>
         </div>
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <div className="flex items-baseline gap-2">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-2">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <span className="font-display text-lg font-bold text-berry">{formatKes(cake.price)}</span>
             {cake.compareAtPrice && (
               <span className="text-xs text-muted-foreground line-through">

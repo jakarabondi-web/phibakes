@@ -113,7 +113,7 @@ export default function ReviewsPage() {
             <Star className="size-3.5 fill-gold text-gold" /> Customer Reviews
           </Badge>
           <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-            Loved by Nairobi, one cake at a time
+            Loved by Nairobi, <span className="italic text-berry">one cake at a time</span>
           </h1>
           <p className="mt-4 text-balance text-lg leading-relaxed text-muted-foreground">
             {ALL_REVIEWS.length}+ verified reviews from real PhiBakes customers.

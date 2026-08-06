@@ -14,7 +14,7 @@ export function CakeGallery({ images, name }: { images: string[]; name: string }
           src={images[active]}
           alt={`${name} — view ${active + 1}`}
           fill
-          priority
+          preload
           sizes="(min-width: 1024px) 45vw, 100vw"
           className="object-cover"
         />
