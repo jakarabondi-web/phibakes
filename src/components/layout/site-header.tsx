@@ -16,53 +16,42 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
 
 const NAV_LINKS = [
-  { label: "Shop Cakes", href: "/cakes" },
-  { label: "Custom Cake", href: "/custom-cake-builder" },
+  { label: "Cakes", href: "/cakes" },
+  { label: "Custom Cakes", href: "/custom-cake-builder" },
+  { label: "Occasions", href: "/cakes" },
   { label: "Ready Today", href: "/cakes/ready-today" },
-  { label: "Gallery", href: "/gallery" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
 
+function Wordmark({ className }: { className?: string }) {
+  return (
+    <span className={cn("font-display text-2xl font-semibold text-primary", className)}>
+      <span className="italic">Phi</span>
+      <span className="not-italic">Bakes</span>
+    </span>
+  );
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
   const { itemCount } = useCart();
-  const [scrolled, setScrolled] = React.useState(false);
-
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 w-full transition-all duration-300",
-        scrolled
-          ? "border-b border-border/70 bg-background/85 backdrop-blur-md shadow-sm"
-          : "border-b border-transparent bg-background/60 backdrop-blur-sm"
-      )}
-    >
-      <div className="container-luxe flex h-18 items-center justify-between py-3">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <span className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-display text-lg font-bold">
-            P
-          </span>
-          <span className="font-display text-xl font-bold tracking-tight text-foreground">
-            PhiBakes
-          </span>
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-cream/95 backdrop-blur-sm">
+      <div className="container-luxe grid h-[76px] grid-cols-[auto_1fr_auto] items-center gap-4">
+        <Link href="/" className="flex shrink-0 items-center">
+          <Wordmark />
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-1">
-          {NAV_LINKS.map((link) => (
+        <nav className="hidden lg:flex items-center justify-center gap-1">
+          {NAV_LINKS.map((link, i) => (
             <Link
-              key={link.href}
+              key={`${link.href}-${i}`}
               href={link.href}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-secondary hover:text-primary",
-                pathname === link.href && "bg-secondary text-primary"
+                "rounded-full px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:text-primary",
+                pathname === link.href && "text-primary font-semibold"
               )}
             >
               {link.label}
@@ -70,7 +59,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-end gap-1">
           <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label="Search">
             <Search />
           </Button>
@@ -89,9 +78,6 @@ export function SiteHeader() {
               )}
             </Link>
           </Button>
-          <Button variant="gold" size="sm" className="ml-1 hidden md:inline-flex" asChild>
-            <Link href="/custom-cake-builder">Design a Cake</Link>
-          </Button>
 
           <Sheet>
             <SheetTrigger asChild>
@@ -99,25 +85,36 @@ export function SiteHeader() {
                 <Menu />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-sm">
+            <SheetContent side="right" className="w-full sm:max-w-sm bg-cream">
               <SheetHeader>
-                <SheetTitle>PhiBakes</SheetTitle>
+                <SheetTitle>
+                  <Wordmark />
+                </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-1 px-6">
-                {NAV_LINKS.map((link) => (
+                {NAV_LINKS.map((link, i) => (
                   <Link
-                    key={link.href}
+                    key={`${link.href}-${i}`}
                     href={link.href}
-                    className="rounded-xl px-3 py-3 text-base font-medium text-foreground hover:bg-secondary"
+                    className={cn(
+                      "rounded-xl px-3 py-3 text-base font-medium text-foreground hover:bg-secondary hover:text-primary",
+                      pathname === link.href && "bg-secondary text-primary"
+                    )}
                   >
                     {link.label}
                   </Link>
                 ))}
                 <div className="my-2 h-px bg-border" />
-                <Link href="/account" className="rounded-xl px-3 py-3 text-base font-medium hover:bg-secondary">
+                <Link
+                  href="/account"
+                  className="rounded-xl px-3 py-3 text-base font-medium hover:bg-secondary hover:text-primary"
+                >
                   My Account
                 </Link>
-                <Link href="/login" className="rounded-xl px-3 py-3 text-base font-medium hover:bg-secondary">
+                <Link
+                  href="/login"
+                  className="rounded-xl px-3 py-3 text-base font-medium hover:bg-secondary hover:text-primary"
+                >
                   Sign In
                 </Link>
               </nav>
