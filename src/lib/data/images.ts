@@ -31,6 +31,28 @@ export const HERO_IMAGES = [
   u("photo-1578985545062-69928b1d9587", 1800),
 ];
 
+// Rotating hero showcase — the studio's signature shot first, then twelve
+// distinct cake styles from the stock library. Every remote ID here was
+// verified alive through the production image optimizer before inclusion.
+export const HERO_SHOWCASE: { src: string; alt: string }[] = [
+  {
+    src: "/images/hero/hero-cake-scene.png",
+    alt: "Two-tier white celebration cake with burgundy roses and a gold drip",
+  },
+  { src: u("photo-1607478900766-efe13248b125", 1600), alt: "Tiered white wedding cake with elegant piping" },
+  { src: u("photo-1578985545062-69928b1d9587", 1600), alt: "Chocolate drip celebration cake" },
+  { src: u("photo-1558301211-0d8c8ddee6ec", 1600), alt: "Blush pink buttercream cake" },
+  { src: u("photo-1571115177098-24ec42ed204d", 1600), alt: "Floral cake dressed with fresh blooms" },
+  { src: u("photo-1626803775151-61d756612f97", 1600), alt: "Gold-accented luxury cake" },
+  { src: u("photo-1621303837174-89787a7d4729", 1600), alt: "Birthday cake with festive decorations" },
+  { src: u("photo-1533134242443-d4fd215305ad", 1600), alt: "Red velvet layer cake" },
+  { src: u("photo-1524351199678-941a58a3df50", 1600), alt: "Cake crowned with fresh berries" },
+  { src: u("photo-1519869325930-281384150729", 1600), alt: "Elegant single-tier cake" },
+  { src: u("photo-1546069901-ba9599a7e63c", 1600), alt: "Colourful celebration cake" },
+  { src: u("photo-1486427944299-d1955d23e34d", 1600), alt: "Rustic naked cake with natural styling" },
+  { src: u("photo-1464349095431-e9a21285b5f3", 1600), alt: "Layered cream cake" },
+];
+
 export const GALLERY_IMAGES = CAKE_IMAGES;
 
 export const AVATAR_IMAGES = [
