@@ -29,7 +29,7 @@ export function StepQuote({ state }: { state: BuilderState }) {
 
   function handleAddToCart() {
     addItem({
-      id: `custom-${Date.now()}`,
+      id: `custom-${Math.random().toString(36).slice(2, 10)}`,
       cakeId: "custom-cake",
       name: cakeName,
       image: cakeImage(3),
