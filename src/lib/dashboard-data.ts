@@ -149,6 +149,44 @@ export function getUpcomingDeliveries(limit = 6) {
     .slice(0, limit);
 }
 
+export function getReportSummary() {
+  const active = ORDERS.filter((o) => o.status !== "Cancelled");
+  const totalRevenue = active.reduce((s, o) => s + o.total, 0);
+  const depositsCollected = active.reduce((s, o) => s + o.amountPaid, 0);
+  const outstanding = active.reduce((s, o) => s + o.balanceDue, 0);
+  const inventoryValuation = INVENTORY.reduce((s, i) => s + i.quantity * i.costPerUnit, 0);
+  const estimatedMarginPct = 38; // plausible bakery gross-margin estimate
+  const estimatedProfit = Math.round(totalRevenue * (estimatedMarginPct / 100));
+  const repeatCustomers = CUSTOMERS.filter((c) => c.totalOrders > 1).length;
+  const avgOrderValue = Math.round(totalRevenue / Math.max(1, active.length));
+
+  return {
+    totalRevenue,
+    depositsCollected,
+    outstanding,
+    inventoryValuation,
+    estimatedMarginPct,
+    estimatedProfit,
+    repeatCustomers,
+    repeatCustomerRate: Math.round((repeatCustomers / Math.max(1, CUSTOMERS.length)) * 100),
+    avgOrderValue,
+    totalOrders: active.length,
+  };
+}
+
+export function getMonthlyGrowth() {
+  // Synthesize a 6-month revenue trend leading up to the reference month,
+  // anchored to the real current-month revenue so the trend is coherent.
+  const stats = getOverviewStats();
+  const months = ["Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+  let running = stats.revenueThisMonth * 0.62;
+  return months.map((m, i) => {
+    if (i === months.length - 1) return { month: m, revenue: stats.revenueThisMonth };
+    running = running * (1 + (0.06 + seeded(i * 5.1) * 0.05));
+    return { month: m, revenue: Math.round(running) };
+  });
+}
+
 export function getPopularCakes(limit = 6) {
   const counts = new Map<string, number>();
   for (const o of ORDERS) {

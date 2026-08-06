@@ -135,7 +135,7 @@ export default function ProfilePage() {
         <Card className="p-6 py-6">
           <CardHeader className="p-0">
             <CardTitle>Notification Preferences</CardTitle>
-            <CardDescription>Choose how you'd like to hear from us for each event.</CardDescription>
+            <CardDescription>Choose how you&apos;d like to hear from us for each event.</CardDescription>
           </CardHeader>
           <div className="mt-5">
             <Table>

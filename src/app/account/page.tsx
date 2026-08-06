@@ -26,8 +26,10 @@ export default function AccountDashboardPage() {
   const activeOrders = orders.filter(isActiveOrder);
   const firstName = CURRENT_CUSTOMER.name.split(" ")[0];
 
+  // eslint-disable-next-line react-hooks/purity -- server component; needs the real current time to find the next upcoming event
+  const now = Date.now();
   const nextEvent = [...orders]
-    .filter((o) => new Date(o.eventDate).getTime() >= Date.now())
+    .filter((o) => new Date(o.eventDate).getTime() >= now)
     .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())[0];
 
   return (
@@ -134,7 +136,7 @@ export default function AccountDashboardPage() {
                 <p className="text-sm font-semibold">{nextEvent.items[0]?.cakeName}</p>
                 <p className="mt-1 text-2xl font-bold text-primary">{formatDate(nextEvent.eventDate, { weekday: "long", day: "numeric", month: "long" })}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {Math.max(0, Math.ceil((new Date(nextEvent.eventDate).getTime() - Date.now()) / 86400000))} days to go &middot; {nextEvent.code}
+                  {Math.max(0, Math.ceil((new Date(nextEvent.eventDate).getTime() - now) / 86400000))} days to go &middot; {nextEvent.code}
                 </p>
               </div>
             ) : (

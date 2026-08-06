@@ -20,7 +20,7 @@ export function ContactForm() {
   if (submitted) {
     return (
       <div className="rounded-xl bg-success/10 p-4 text-sm text-success">
-        Thanks for reaching out! We've received your message and will respond shortly via email.
+        Thanks for reaching out! We&apos;ve received your message and will respond shortly via email.
       </div>
     );
   }

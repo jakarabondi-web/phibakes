@@ -63,7 +63,7 @@ export default function RewardsPage() {
                 </p>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">You've reached our highest tier — thank you for your loyalty!</p>
+              <p className="text-sm text-muted-foreground">You&apos;ve reached our highest tier — thank you for your loyalty!</p>
             )}
           </div>
 
