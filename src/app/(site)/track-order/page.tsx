@@ -66,7 +66,9 @@ function TrackOrderContent() {
   }, []);
 
   React.useEffect(() => {
+    // Auto-run the search once when arriving via a ?code= deep link.
     if (initialCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       doSearch(initialCode, "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

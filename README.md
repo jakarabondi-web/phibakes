@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PhiBakes
+
+**Beautiful cakes, baked for your moment.**
+
+PhiBakes is a premium cake ordering and bakery management platform for a
+Nairobi-based cake studio — combining a boutique storefront, a custom cake
+builder, M-PESA payments, real-time order tracking, and a full operations
+dashboard for the bakery owner.
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Turbopack), React 19, TypeScript
+- **Styling:** Tailwind CSS v4 with a custom design system (brand tokens, dark mode)
+- **UI:** shadcn-style component library on Radix UI primitives, Framer Motion, Recharts
+- **Data:** Prisma ORM + PostgreSQL (schema in `prisma/schema.prisma`), with a typed mock-data layer (`src/lib/data/`) so the UI runs fully styled without a live database
+- **Payments:** Safaricom Daraja (M-PESA STK Push) integration scaffolding in `src/lib/services/mpesa.ts`
+- **Notifications:** Resend (email) and Twilio (SMS/WhatsApp) service stubs in `src/lib/services/`
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The app runs fully styled out of the box using the mock data layer — no
+database or third-party credentials are required for local development.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+- `src/app/(site)/` — public storefront: homepage, catalog, cake details, custom cake builder, cart, checkout, order tracking, static/info pages, auth
+- `src/app/account/` — customer portal: orders, quotes, invoices, payments, addresses, wishlist, rewards, notifications, support, profile
+- `src/app/dashboard/` — owner/admin dashboard: overview, orders, quotes, customers, calendar, production, inventory, recipes, suppliers, payments, reports, marketing, gallery, reviews, staff, delivery, settings, audit logs
+- `src/app/api/` — route handlers for cakes, orders, quotes, inventory, M-PESA (STK push/callback/status), and notifications
+- `src/components/ui/` — the design system's component library
+- `src/lib/data/` — mock data (cakes, orders, quotes, inventory, customers, etc.)
+- `src/lib/services/` — third-party integration stubs (M-PESA, email, SMS/WhatsApp)
+- `prisma/schema.prisma` — full production data model
 
-To learn more about Next.js, take a look at the following resources:
+## Going to production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Copy `.env.example` to `.env` and fill in real credentials to move from the
+mock-data layer to a live database and real integrations:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `DATABASE_URL` — a Postgres connection string (Neon recommended)
+- `MPESA_*` — Safaricom Daraja API credentials for M-PESA STK Push
+- `RESEND_API_KEY` — for transactional email
+- `TWILIO_*` — for SMS and WhatsApp notifications
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` — for delivery zone maps
+- `CLOUDFLARE_R2_*` — for photo/asset storage
 
-## Deploy on Vercel
+Then run:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run db:push    # or db:migrate for versioned migrations
+npm run db:seed    # populate categories/products/demo users
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run lint` | Lint the codebase |
+| `npm run db:generate` | Regenerate the Prisma client |
+| `npm run db:push` | Push the schema to your database |
+| `npm run db:migrate` | Create/apply a versioned migration |
+| `npm run db:seed` | Seed categories, products, and demo users |
+| `npm run db:studio` | Open Prisma Studio |

@@ -94,6 +94,9 @@ export default function CheckoutPage() {
   const stkTimers = React.useRef<ReturnType<typeof setTimeout>[]>([]);
 
   React.useEffect(() => {
+    // Pre-fill the M-PESA phone field from customer info the first time it's entered,
+    // without overwriting anything the user has since typed into the payment field directly.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (phone && !mpesaPhone) setMpesaPhone(phone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phone]);
