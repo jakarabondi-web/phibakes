@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { HERO_IMAGES } from "@/lib/data";
 
 export function HeroSection() {
   return (
@@ -11,18 +10,19 @@ export function HeroSection() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
             Handcrafted cakes in Nairobi
           </p>
-          <h1 className="mt-4 font-display text-[clamp(2.5rem,5vw+1rem,4.25rem)] font-medium leading-[1.05] text-foreground">
+          <h1 className="mt-5 font-display text-[clamp(2.75rem,5.5vw+1rem,4.75rem)] font-medium leading-[1.03] text-foreground">
             Beautiful cakes,
             <br />
-            baked for
-            <br />
-            your moment.
+            baked for{" "}
+            <span className="italic text-berry" style={{ fontOpticalSizing: "auto" }}>
+              your moment.
+            </span>
           </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-muted-foreground">
+          <p className="mt-6 max-w-md text-[1.05rem] leading-relaxed text-muted-foreground">
             Premium cakes made with love in Nairobi. Order online, pay with M-PESA, and
             we&apos;ll handle the rest.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" className="uppercase tracking-wide text-xs" asChild>
               <Link href="/cakes">Order a Cake</Link>
             </Button>
@@ -32,10 +32,10 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-xl lg:aspect-auto lg:h-full lg:min-h-[420px]">
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-[0_24px_60px_-16px_rgba(74,27,38,0.28)] ring-1 ring-black/5 lg:aspect-auto lg:h-full lg:min-h-[420px]">
           <Image
-            src={HERO_IMAGES[0]}
-            alt="Elegant handcrafted celebration cake by PhiBakes"
+            src="/images/hero/hero-cake-scene.png"
+            alt="Elegant white celebration cake with burgundy roses and a gold drip, by PhiBakes"
             fill
             priority
             sizes="(min-width: 1024px) 50vw, 90vw"

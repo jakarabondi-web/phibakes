@@ -4,10 +4,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getFeaturedCakes } from "@/lib/data";
+import { getCakeBySlug } from "@/lib/data";
 import { useCart } from "@/lib/cart-context";
-import { formatKes } from "@/lib/utils";
+import { formatKes, slugify } from "@/lib/utils";
 import type { Cake } from "@/types";
+
+const FEATURED_NAMES = [
+  "Chocolate Indulgence",
+  "Red Velvet Dream",
+  "Golden Romance",
+  "Ferrero Rocher Bliss",
+];
 
 function FeaturedCakeCard({ cake }: { cake: Cake }) {
   const { addItem } = useCart();
@@ -83,7 +90,9 @@ function FeaturedCakeCard({ cake }: { cake: Cake }) {
 }
 
 export function FeaturedCakes() {
-  const cakes = getFeaturedCakes(4);
+  const cakes = FEATURED_NAMES.map((name) => getCakeBySlug(slugify(name))).filter(
+    (c): c is Cake => Boolean(c)
+  );
 
   return (
     <section className="py-16 sm:py-20">

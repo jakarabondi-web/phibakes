@@ -50,6 +50,11 @@ type Seed = {
   tags: string[];
   imageIdx: number[];
   available?: boolean;
+  /** Overrides the computed Unsplash `imageIdx` lookup with explicit local paths. */
+  images?: string[];
+  /** Overrides the formulaic rating/reviewCount for products with known reference values. */
+  rating?: number;
+  reviewCount?: number;
 };
 
 const SEEDS: Seed[] = [
@@ -268,9 +273,9 @@ const SEEDS: Seed[] = [
     imageIdx: [6, 17],
   },
   {
-    name: "Today's Chocolate Fudge Cake",
+    name: "Classic Chocolate Cake",
     category: "ready-today",
-    price: 4200,
+    price: 3000,
     servings: "8–10 slices",
     prepTimeHours: 0,
     flavours: ["Chocolate"],
@@ -282,13 +287,13 @@ const SEEDS: Seed[] = [
     available: true,
   },
   {
-    name: "Today's Red Velvet Cake",
+    name: "Red Velvet Slice",
     category: "ready-today",
-    price: 4600,
-    servings: "8–10 slices",
+    price: 2800,
+    servings: "1 generous slice",
     prepTimeHours: 0,
     flavours: ["Red Velvet"],
-    sizes: ["1kg"],
+    sizes: ["Custom"],
     productionPoints: 1,
     description: "Velvety layers with cream cheese frosting, available for pickup within the hour.",
     tags: ["Ready Today"],
@@ -296,18 +301,86 @@ const SEEDS: Seed[] = [
     available: true,
   },
   {
-    name: "Today's Assorted Cupcake Box",
+    name: "Vanilla Cupcakes (6pcs)",
     category: "ready-today",
-    price: 2200,
-    servings: "12 cupcakes",
+    price: 2800,
+    servings: "6 cupcakes",
     prepTimeHours: 0,
-    flavours: ["Vanilla", "Chocolate", "Red Velvet"],
+    flavours: ["Vanilla"],
     sizes: ["Custom"],
     productionPoints: 1,
-    description: "A grab-and-go dozen mixed cupcakes, freshly finished this morning.",
+    description: "A grab-and-go box of six vanilla cupcakes, freshly finished this morning.",
     tags: ["Ready Today"],
     imageIdx: [5, 16],
     available: true,
+  },
+  // The next four are the site's flagship "Featured Cakes" — named and priced
+  // to match the studio's reference design exactly, with local photography.
+  {
+    name: "Chocolate Indulgence",
+    category: "birthday",
+    price: 4500,
+    servings: "12–14 servings",
+    prepTimeHours: 24,
+    flavours: ["Chocolate"],
+    sizes: ["1kg", "2kg"],
+    productionPoints: 3,
+    description:
+      "Layers of rich dark chocolate sponge and silky ganache, finished with chocolate shavings for a deeply indulgent celebration cake.",
+    tags: ["Bestseller", "Featured"],
+    imageIdx: [],
+    images: ["/images/featured/chocolate-indulgence.png"],
+    rating: 4.8,
+    reviewCount: 128,
+  },
+  {
+    name: "Red Velvet Dream",
+    category: "birthday",
+    price: 4800,
+    servings: "12–14 servings",
+    prepTimeHours: 24,
+    flavours: ["Red Velvet"],
+    sizes: ["1kg", "2kg"],
+    productionPoints: 3,
+    description:
+      "Classic red velvet sponge with a tang of buttermilk, layered and finished in smooth cream cheese frosting.",
+    tags: ["Bestseller", "Featured"],
+    imageIdx: [17, 13],
+    rating: 4.9,
+    reviewCount: 96,
+  },
+  {
+    name: "Golden Romance",
+    category: "wedding",
+    price: 6200,
+    servings: "16–18 servings",
+    prepTimeHours: 48,
+    flavours: ["Vanilla", "Marble"],
+    sizes: ["2kg", "3kg"],
+    productionPoints: 3,
+    description:
+      "An elegant white fondant cake dressed in a gold drip and sugar florals — a romantic centrepiece for engagements and intimate weddings.",
+    tags: ["Popular", "Featured"],
+    imageIdx: [11, 4],
+    rating: 4.8,
+    reviewCount: 73,
+  },
+  {
+    name: "Ferrero Rocher Bliss",
+    category: "birthday",
+    price: 5200,
+    servings: "12–14 servings",
+    prepTimeHours: 24,
+    flavours: ["Chocolate"],
+    sizes: ["1kg", "2kg"],
+    productionPoints: 3,
+    description:
+      "Chocolate-hazelnut sponge crowned with a chocolate drip and whole Ferrero Rocher pralines — built for chocolate-hazelnut lovers.",
+    tags: ["Bestseller", "Featured"],
+    imageIdx: [],
+    images: ["/images/featured/ferrero-rocher-bliss.png"],
+    rating: 4.8,
+    reviewCount: 111,
   },
 ];
 
@@ -316,7 +389,7 @@ export const CAKES: Cake[] = SEEDS.map((s, i) => ({
   slug: slugify(s.name),
   name: s.name,
   category: s.category,
-  images: s.imageIdx.map((idx) => cakeImage(idx)),
+  images: s.images ?? s.imageIdx.map((idx) => cakeImage(idx)),
   price: s.price,
   compareAtPrice: s.compareAtPrice,
   servings: s.servings,
@@ -324,8 +397,8 @@ export const CAKES: Cake[] = SEEDS.map((s, i) => ({
   available: s.available ?? true,
   flavours: s.flavours,
   sizes: s.sizes,
-  rating: 4.6 + ((i % 3) * 0.1),
-  reviewCount: 18 + i * 7,
+  rating: s.rating ?? 4.6 + ((i % 3) * 0.1),
+  reviewCount: s.reviewCount ?? 18 + i * 7,
   description: s.description,
   tags: s.tags,
   productionPoints: s.productionPoints,

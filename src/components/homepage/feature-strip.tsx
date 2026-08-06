@@ -1,7 +1,7 @@
-import { Smartphone, CalendarCheck, Radar, Truck, type LucideIcon } from "lucide-react";
+import Image from "next/image";
 
 type Feature = {
-  icon: LucideIcon;
+  icon: string;
   title: string;
   description: string;
   accent: "primary" | "success";
@@ -9,25 +9,25 @@ type Feature = {
 
 const FEATURES: Feature[] = [
   {
-    icon: Smartphone,
+    icon: "/images/trust-icons/mpesa-payments.png",
     title: "M-PESA Payments",
     description: "Secure & Fast",
     accent: "success",
   },
   {
-    icon: CalendarCheck,
+    icon: "/images/trust-icons/book-and-schedule.png",
     title: "Book & Schedule",
     description: "Pick a date",
     accent: "primary",
   },
   {
-    icon: Radar,
+    icon: "/images/trust-icons/track-your-order.png",
     title: "Track Your Order",
     description: "Stay updated",
     accent: "success",
   },
   {
-    icon: Truck,
+    icon: "/images/trust-icons/delivery-in-nairobi.png",
     title: "Delivery in Nairobi",
     description: "Safe & On Time",
     accent: "primary",
@@ -45,13 +45,11 @@ export function FeatureStrip() {
               className="flex w-64 shrink-0 snap-start items-center gap-4 py-8 sm:w-auto sm:shrink sm:px-6"
             >
               <span
-                className={`flex size-11 shrink-0 items-center justify-center rounded-full border ${
-                  feature.accent === "primary"
-                    ? "border-primary/30 text-primary"
-                    : "border-success/30 text-success"
+                className={`relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border ${
+                  feature.accent === "primary" ? "border-primary/30" : "border-success/30"
                 }`}
               >
-                <feature.icon className="size-5" />
+                <Image src={feature.icon} alt="" fill className="object-contain p-2" aria-hidden />
               </span>
               <div>
                 <p className="text-sm font-bold text-foreground">{feature.title}</p>
