@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -41,8 +40,15 @@ export function Testimonials() {
                 &ldquo;{t.quote}&rdquo;
               </p>
               <div className="mt-6 flex items-center gap-3 px-0">
-                <div className="relative size-10 shrink-0 overflow-hidden rounded-full">
-                  <Image src={t.avatar} alt={t.name} fill className="object-cover" />
+                <div
+                  aria-hidden
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blush font-display text-sm font-semibold text-berry"
+                >
+                  {t.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .slice(0, 2)
+                    .join("")}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">{t.name}</p>

@@ -1,9 +1,16 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/site/section-heading";
-import { GALLERY_IMAGES } from "@/lib/data/images";
 
-const GALLERY = GALLERY_IMAGES.slice(0, 6);
+// The studio's own photography — the same cohesive set used across the site.
+const GALLERY = [
+  "/images/categories/birthday-cake.png",
+  "/images/categories/wedding-cake.png",
+  "/images/categories/graduation-cake.png",
+  "/images/categories/corporate-cake.png",
+  "/images/categories/cupcakes.png",
+  "/images/categories/desserts.png",
+];
 
 export function InstagramGallery() {
   return (

@@ -9,11 +9,12 @@ import { useCart } from "@/lib/cart-context";
 import { formatKes, slugify } from "@/lib/utils";
 import type { Cake } from "@/types";
 
+// The "Featured favourites" lineup from the Option 1 reference board.
 const FEATURED_NAMES = [
-  "Chocolate Indulgence",
-  "Red Velvet Dream",
-  "Golden Romance",
-  "Ferrero Rocher Bliss",
+  "Velvet Rose",
+  "Golden Vanilla",
+  "Celebration Bloom",
+  "Cocoa Luxe",
 ];
 
 function FeaturedCakeCard({ cake }: { cake: Cake }) {

@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cakeImage } from "@/lib/data";
 
 export function CustomCakeBanner() {
   return (
@@ -12,8 +11,8 @@ export function CustomCakeBanner() {
           <div className="relative order-2 lg:order-1">
             <div className="relative mx-auto aspect-[4/3] w-full max-w-md overflow-hidden rounded-xl shadow-lg">
               <Image
-                src={cakeImage(4)}
-                alt="Custom-designed celebration cake by PhiBakes"
+                src="/images/categories/corporate-cake.png"
+                alt="Bespoke art-panel cake in burgundy and gold by PhiBakes"
                 fill
                 sizes="(min-width: 1024px) 40vw, 90vw"
                 className="object-cover"
@@ -21,8 +20,8 @@ export function CustomCakeBanner() {
             </div>
             <div className="absolute -bottom-6 -right-4 hidden size-28 overflow-hidden rounded-xl border-4 border-cream shadow-lg sm:block">
               <Image
-                src={cakeImage(11)}
-                alt="Detail of a custom cake design"
+                src="/images/categories/wedding-cake.png"
+                alt="Custom two-tier floral cake by PhiBakes"
                 fill
                 sizes="112px"
                 className="object-cover"
@@ -30,8 +29,8 @@ export function CustomCakeBanner() {
             </div>
             <div className="absolute -top-5 -left-4 hidden size-24 overflow-hidden rounded-xl border-4 border-cream shadow-lg sm:block">
               <Image
-                src={cakeImage(8)}
-                alt="Detail of a custom cake design"
+                src="/images/categories/cupcakes.png"
+                alt="Handcrafted cupcakes by PhiBakes"
                 fill
                 sizes="96px"
                 className="object-cover"

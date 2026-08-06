@@ -9,7 +9,7 @@ import type { Cake } from "@/types";
 // seeded cakes in the catalogue — fuzzy-matched by name, falling back to a
 // flavour match for cakes that aren't literally named that (e.g. "Black
 // Forest" only appears as a flavour, not a cake name).
-const TARGET_KEYWORDS = ["red velvet", "chocolate fudge", "vanilla", "black forest", "lemon"];
+const TARGET_KEYWORDS = ["red velvet", "chocolate", "vanilla", "black forest", "lemon"];
 
 function findCakeForKeyword(keyword: string, used: Set<string>): Cake | undefined {
   const byName = CAKES.find((c) => !used.has(c.id) && c.name.toLowerCase().includes(keyword));
