@@ -1,18 +1,38 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Eye, EyeOff, UserPlus, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Eye, EyeOff, KeyRound, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { register, type AuthFormState } from "@/lib/auth/actions";
+import { resetPassword } from "@/lib/auth/password-reset";
+import type { AuthFormState } from "@/lib/auth/actions";
 
-export function RegisterForm() {
+export function ResetPasswordForm() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, pending] = useActionState<AuthFormState, FormData>(register, {});
+  const [state, formAction, pending] = useActionState<AuthFormState, FormData>(resetPassword, {});
+
+  if (!token) {
+    return (
+      <div className="flex flex-col gap-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          This link is missing its reset token. Request a new one to continue.
+        </p>
+        <Button asChild className="w-full">
+          <Link href="/forgot-password">Request a new link</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="token" value={token} />
+
       {state.error && (
         <p
           role="alert"
@@ -24,56 +44,7 @@ export function RegisterForm() {
       )}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Full name</Label>
-        <Input
-          id="name"
-          name="name"
-          autoComplete="name"
-          placeholder="Jane Wanjiku"
-          required
-          aria-invalid={!!state.fieldErrors?.name}
-        />
-        {state.fieldErrors?.name && (
-          <p className="text-xs text-destructive">{state.fieldErrors.name}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email address</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@email.com"
-          required
-          aria-invalid={!!state.fieldErrors?.email}
-        />
-        {state.fieldErrors?.email && (
-          <p className="text-xs text-destructive">{state.fieldErrors.email}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="phone">
-          Phone number <span className="font-normal text-muted-foreground">(optional)</span>
-        </Label>
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="07XX XXX XXX"
-          aria-invalid={!!state.fieldErrors?.phone}
-        />
-        {state.fieldErrors?.phone && (
-          <p className="text-xs text-destructive">{state.fieldErrors.phone}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">New password</Label>
         <div className="relative">
           <Input
             id="password"
@@ -105,7 +76,7 @@ export function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="confirmPassword">Confirm password</Label>
+        <Label htmlFor="confirmPassword">Confirm new password</Label>
         <Input
           id="confirmPassword"
           name="confirmPassword"
@@ -121,8 +92,8 @@ export function RegisterForm() {
       </div>
 
       <Button type="submit" size="lg" disabled={pending} className="mt-2 w-full">
-        {pending ? "Creating account…" : "Create Account"}
-        {!pending && <UserPlus className="size-4" />}
+        {pending ? "Updating…" : "Update password"}
+        {!pending && <KeyRound className="size-4" />}
       </Button>
     </form>
   );

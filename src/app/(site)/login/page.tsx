@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { LoginForm } from "./login-form";
@@ -40,7 +41,9 @@ export default function LoginPage() {
               </div>
             </CardHeader>
             <CardContent className="pt-2">
-              <LoginForm />
+              <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-muted/50" />}>
+                <LoginForm />
+              </Suspense>
             </CardContent>
           </Card>
 

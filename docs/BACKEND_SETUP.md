@@ -67,6 +67,47 @@ handling:
   row to attach to, so these take the synthesized path deliberately even with a
   live database. They are not failures.
 
+## Authentication
+
+Sign-in needs one more variable beyond `DATABASE_URL`:
+
+```bash
+AUTH_SECRET="$(openssl rand -base64 32)"   # >= 32 chars, keep it secret
+NEXT_PUBLIC_SITE_URL="https://phibakes.co.ke"
+```
+
+`AUTH_SECRET` signs the session cookie — anyone who knows it can mint a session
+for any user, so treat it like a password and use a different value per
+environment. The app refuses to sign anything with a missing or short secret
+rather than falling back to a guessable key.
+
+**How protection is layered.** `src/proxy.ts` (Next 16's replacement for the
+deprecated `middleware.ts`) runs on every matched route and only *reads* the
+cookie — no database call, because it also runs on prefetches. That check is
+optimistic: it proves the cookie's signature, not that the user still exists or
+still holds the encoded role. The authoritative check lives in
+`src/lib/auth/dal.ts`, which re-reads the user from the database and is called
+by the `/account` and `/dashboard` layouts. Both are needed: the proxy makes
+redirects fast, the DAL makes them true.
+
+**Without a database**, sign-in falls back to demo accounts
+(`src/lib/auth/demo-users.ts`) so the flow is explorable on a fresh clone —
+`owner@phibakes.co.ke`, `baker@phibakes.co.ke`, or `customer@phibakes.co.ke`,
+all with password `demo1234`. These are ignored entirely once `DATABASE_URL`
+points at a real database. Registration and password reset both require a
+database and say so.
+
+**Google sign-in** is fully implemented and disabled until credentials exist.
+Create an OAuth 2.0 Client ID in the Google console, add
+`<NEXT_PUBLIC_SITE_URL>/api/auth/google/callback` as an authorised redirect URI,
+and set `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`. Until then the button
+renders disabled with a note, rather than starting a flow that can't finish.
+
+**Password reset** emails a single-use token that expires in an hour; only its
+SHA-256 hash is stored, so a database dump can't be used to reset anyone's
+password. With no `RESEND_API_KEY`, the email is logged instead of sent and the
+reset link is shown on screen so the flow is still completable in development.
+
 ## Still client-side after this step
 
 These use `localStorage` and are per-browser, so they don't appear in the
@@ -79,9 +120,9 @@ database yet:
   (`src/lib/data/abandoned-carts.ts`)
 
 Each is written against the shape its eventual server query will return, so
-moving them is a data-source swap rather than a rewrite. They need customer
-accounts (real auth) to be meaningful, since they're per-person rather than
-per-browser.
+moving them is a data-source swap rather than a rewrite. Now that accounts
+exist, these can be keyed to `getCurrentUser()` and persisted per customer — the
+remaining work is the data migration, not the auth.
 
 ## Other integrations
 

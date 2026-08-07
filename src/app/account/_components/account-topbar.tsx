@@ -2,9 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Bell, Menu, LogOut, UserCog } from "lucide-react";
-import { toast } from "sonner";
+import { Bell, Menu, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SignOutItem } from "@/components/auth/sign-out-item";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { initials } from "@/lib/utils";
 import { AccountNavLinks } from "./account-sidebar";
@@ -30,7 +29,6 @@ export function AccountTopbar({
   avatar?: string;
   unread: number;
 }) {
-  const router = useRouter();
   const [sheetOpen, setSheetOpen] = React.useState(false);
 
   return (
@@ -106,15 +104,7 @@ export function AccountTopbar({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => {
-                  toast.success("Signed out — see you again soon!");
-                  router.push("/");
-                }}
-              >
-                <LogOut className="size-4" /> Sign out
-              </DropdownMenuItem>
+              <SignOutItem />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

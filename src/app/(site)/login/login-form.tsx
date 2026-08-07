@@ -1,34 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { useActionState, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Eye, EyeOff, LogIn, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signIn, type AuthFormState } from "@/lib/auth/actions";
 
 export function LoginForm() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const searchParams = useSearchParams();
+  // Set by proxy.ts when it bounces an unauthenticated request, so sign-in can
+  // return the user to where they were actually headed.
+  const next = searchParams.get("next") ?? "";
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitting(true);
-    window.setTimeout(() => {
-      setSubmitting(false);
-      toast.success("Welcome back! Redirecting to your dashboard…");
-      router.push("/account");
-    }, 800);
-  }
+  const [state, formAction, pending] = useActionState<AuthFormState, FormData>(signIn, {});
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="next" value={next} />
+
+      {state.error && (
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive"
+        >
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          {state.error}
+        </p>
+      )}
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email address</Label>
-        <Input id="email" name="email" type="email" placeholder="you@email.com" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@email.com"
+          required
+          aria-invalid={!!state.fieldErrors?.email}
+        />
+        {state.fieldErrors?.email && (
+          <p className="text-xs text-destructive">{state.fieldErrors.email}</p>
+        )}
       </div>
+
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Password</Label>
@@ -41,9 +59,11 @@ export function LoginForm() {
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
             placeholder="••••••••"
             required
             className="pr-11"
+            aria-invalid={!!state.fieldErrors?.password}
           />
           <button
             type="button"
@@ -54,11 +74,14 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         </div>
+        {state.fieldErrors?.password && (
+          <p className="text-xs text-destructive">{state.fieldErrors.password}</p>
+        )}
       </div>
 
-      <Button type="submit" size="lg" disabled={submitting} className="mt-2 w-full">
-        {submitting ? "Signing in…" : "Sign In"}
-        {!submitting && <LogIn className="size-4" />}
+      <Button type="submit" size="lg" disabled={pending} className="mt-2 w-full">
+        {pending ? "Signing in…" : "Sign In"}
+        {!pending && <LogIn className="size-4" />}
       </Button>
     </form>
   );
