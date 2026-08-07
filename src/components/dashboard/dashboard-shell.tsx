@@ -4,7 +4,15 @@ import * as React from "react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardTopbar } from "@/components/dashboard/topbar";
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export type ShellUser = { name: string; email: string; role: string; avatarUrl?: string | null };
+
+export function DashboardShell({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user?: ShellUser;
+}) {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
@@ -14,7 +22,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     >
       <DashboardSidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardTopbar />
+        <DashboardTopbar user={user} />
         <main className="flex-1 px-3 pb-4 pt-3 sm:pb-6 sm:pt-4 lg:pb-8 lg:pt-5">{children}</main>
       </div>
     </div>

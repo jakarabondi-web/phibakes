@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { isDatabaseConfigured } from "@/lib/db-status";
 import { readSession, isStaffRole, type SessionPayload } from "./session";
 import { findDemoUserById } from "./demo-users";
+import { getOwnerAccount, OWNER_ACCOUNT_ID } from "./owner-account";
 
 /**
  * Data Access Layer — the authoritative auth check.
@@ -38,6 +39,23 @@ export const verifySession = cache(async (): Promise<SessionPayload | null> => {
 export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   const session = await verifySession();
   if (!session) return null;
+
+  // The env-configured owner has no database row, so resolve it here — with or
+  // without a database — otherwise sign-in would succeed and the layout would
+  // immediately bounce them back to /login.
+  if (session.userId === OWNER_ACCOUNT_ID) {
+    const owner = getOwnerAccount();
+    return owner
+      ? {
+          id: owner.id,
+          name: owner.name,
+          email: owner.email,
+          role: owner.role,
+          avatarUrl: null,
+          twoFactorEnabled: false,
+        }
+      : null;
+  }
 
   // Without a database, fall back to the built-in demo accounts so the app is
   // still explorable — the same reason the API routes serve mock data.

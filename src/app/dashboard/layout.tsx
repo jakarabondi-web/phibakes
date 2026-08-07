@@ -12,6 +12,12 @@ export const metadata: Metadata = {
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Staff-only, re-verified against the database rather than trusting the cookie's role.
-  await requireStaff("/dashboard");
-  return <DashboardShell>{children}</DashboardShell>;
+  const user = await requireStaff("/dashboard");
+  return (
+    <DashboardShell
+      user={{ name: user.name, email: user.email, role: user.role, avatarUrl: user.avatarUrl }}
+    >
+      {children}
+    </DashboardShell>
+  );
 }
