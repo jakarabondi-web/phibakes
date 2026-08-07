@@ -26,7 +26,7 @@ function Wordmark() {
         width={1492}
         height={1022}
         priority
-        className="h-20 w-auto sm:h-24 lg:h-28"
+        className="h-28 w-auto sm:h-32 lg:h-36"
       />
     </Link>
   );
