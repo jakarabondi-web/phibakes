@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { getOrderByCode } from "@/lib/data/orders";
+import { getPlacedOrderByCode } from "@/lib/placed-orders";
 import { ORDER_STATUS_FLOW, type Order } from "@/types";
 import { cn, formatKes, formatDate, formatDateTime } from "@/lib/utils";
 
@@ -43,7 +44,9 @@ function TrackOrderContent() {
       setSearched(true);
       return;
     }
-    const found = getOrderByCode(trimmedCode);
+    // Orders placed from this browser take precedence over the demo seeds, so a
+    // real order shows its own status rather than a seed's mid-production one.
+    const found = getPlacedOrderByCode(trimmedCode) ?? getOrderByCode(trimmedCode);
     setSearched(true);
     if (!found) {
       setOrder(null);

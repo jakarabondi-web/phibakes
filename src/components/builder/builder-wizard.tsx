@@ -42,7 +42,6 @@ function canAdvance(step: number, state: BuilderState) {
       return Boolean(
         state.event.date &&
           state.event.time &&
-          state.event.guests &&
           (state.event.fulfilment === "pickup" || state.event.venueOrAddress.trim().length > 0)
       );
     default:

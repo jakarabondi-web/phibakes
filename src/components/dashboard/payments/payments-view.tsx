@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import type { Order, PaymentRecord } from "@/types";
 import { Card } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
@@ -13,7 +14,13 @@ import { CreditCard, RotateCcw, Wallet, Banknote, PiggyBank, AlertTriangle, Cloc
 
 type Row = PaymentRecord & { orderCode: string; customerName: string };
 
-const METHOD_ICON = { mpesa: Wallet, card: CreditCard, cash: Banknote } as const;
+const METHOD_ICON: Record<PaymentRecord["method"], LucideIcon> = {
+  mpesa: Wallet,
+  airtel: Wallet,
+  card: CreditCard,
+  paypal: CreditCard,
+  cash: Banknote,
+};
 
 export function PaymentsView({ orders }: { orders: Order[] }) {
   const rows: Row[] = orders.flatMap((o) =>

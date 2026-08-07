@@ -14,6 +14,8 @@ import {
   ChevronRight,
   Lock,
   RefreshCw,
+  CreditCard,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -40,6 +42,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-context";
 import { cn, formatKes } from "@/lib/utils";
 import { DELIVERY_ZONES, getDeliveryFee, STUDIO_ADDRESS, STUDIO_HOURS } from "@/lib/delivery";
+import { CARRIER_LABEL, kenyanPhoneError, parseKenyanPhone } from "@/lib/kenya-phone";
+import { buildPlacedOrder, savePlacedOrder } from "@/lib/placed-orders";
 
 const PROMO_CODE = "SWEET10";
 const PROMO_DISCOUNT = 0.1;
@@ -53,11 +57,38 @@ type FormErrors = Partial<Record<
   string
 >>;
 
-const KENYAN_PHONE_RE = /^(?:\+254|0)(7\d{8}|1\d{8})$/;
+type PaymentMethod = "mpesa" | "airtel" | "card" | "paypal";
 
-function normalizePhone(raw: string) {
-  return raw.replace(/\s+/g, "");
-}
+/**
+ * Card and PayPal will be routed through Pesapal's hosted checkout once its
+ * API credentials are wired up; both are presented here so the flow and the
+ * order record already carry the right method.
+ */
+const PAY_METHODS: Record<
+  PaymentMethod,
+  { label: string; icon: typeof Smartphone; blurb: string }
+> = {
+  mpesa: {
+    label: "M-PESA",
+    icon: Smartphone,
+    blurb: "We'll send a Lipa na M-PESA prompt straight to your phone.",
+  },
+  airtel: {
+    label: "Airtel Money",
+    icon: Smartphone,
+    blurb: "We'll send an Airtel Money prompt straight to your phone.",
+  },
+  card: {
+    label: "Card",
+    icon: CreditCard,
+    blurb: "Visa or Mastercard, processed securely by Pesapal.",
+  },
+  paypal: {
+    label: "PayPal",
+    icon: Globe,
+    blurb: "Pay from your PayPal balance or linked card.",
+  },
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -82,7 +113,11 @@ export default function CheckoutPage() {
 
   // Payment
   const [paymentPlan, setPaymentPlan] = React.useState<PaymentPlan>("deposit");
+  const [payMethod, setPayMethod] = React.useState<PaymentMethod>("mpesa");
   const [mpesaPhone, setMpesaPhone] = React.useState("");
+
+  const isMobileMoney = payMethod === "mpesa" || payMethod === "airtel";
+  const detectedCarrier = parseKenyanPhone(mpesaPhone)?.carrier ?? null;
 
   const [errors, setErrors] = React.useState<FormErrors>({});
 
@@ -130,15 +165,29 @@ export default function CheckoutPage() {
     const next: FormErrors = {};
     if (!name.trim() || name.trim().length < 2) next.name = "Enter your full name.";
     if (!/^\S+@\S+\.\S+$/.test(email)) next.email = "Enter a valid email address.";
-    if (!KENYAN_PHONE_RE.test(normalizePhone(phone)))
-      next.phone = "Use a Kenyan number, e.g. 0712 345 678.";
+    const phoneErr = kenyanPhoneError(phone);
+    if (phoneErr) next.phone = phoneErr;
     if (fulfilment === "delivery") {
       if (!address.trim()) next.address = "Enter your delivery address.";
       if (!zone) next.zone = "Select a delivery zone.";
     }
     if (!eventDate) next.eventDate = "Choose your event date.";
-    if (!KENYAN_PHONE_RE.test(normalizePhone(mpesaPhone)))
-      next.mpesaPhone = "Enter a valid M-PESA number, e.g. 0712 345 678.";
+    // Only mobile-money rails need a phone; card/PayPal are handled by Pesapal's
+    // hosted page, so don't block those on a number the customer needn't give.
+    if (isMobileMoney) {
+      const moneyErr = kenyanPhoneError(mpesaPhone, { mobileMoneyOnly: true });
+      if (moneyErr) next.mpesaPhone = moneyErr;
+      else {
+        const parsed = parseKenyanPhone(mpesaPhone);
+        const wanted = payMethod === "mpesa" ? "safaricom" : "airtel";
+        if (parsed && parsed.carrier !== wanted) {
+          next.mpesaPhone =
+            payMethod === "mpesa"
+              ? `That's ${CARRIER_LABEL[parsed.carrier!]} — M-PESA needs a Safaricom number. Switch to Airtel Money above, or use a Safaricom line.`
+              : `That's ${CARRIER_LABEL[parsed.carrier!]} — Airtel Money needs an Airtel number. Switch to M-PESA above, or use an Airtel line.`;
+        }
+      }
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -184,9 +233,47 @@ export default function CheckoutPage() {
   }
 
   function handleDone() {
+    const code = orderCode ?? "PB-00000";
+    // Persist the order so the tracker has something real to find — at
+    // "Requested" only. Nothing here advances it; a vendor update does.
+    savePlacedOrder(
+      buildPlacedOrder({
+        code,
+        customerName: name.trim(),
+        customerPhone: parseKenyanPhone(phone)?.formatted ?? phone,
+        customerEmail: email.trim(),
+        items: items.map((item, i) => ({
+          id: `item-${i + 1}`,
+          cakeName: item.name,
+          image: item.image,
+          size: item.size,
+          flavour: item.flavour,
+          quantity: item.quantity,
+          price: item.price,
+          isCustom: item.isCustom,
+        })),
+        total,
+        amountPaid: amountDue,
+        fulfilment,
+        deliveryAddress: fulfilment === "delivery" ? address.trim() : undefined,
+        deliveryZone: fulfilment === "delivery" ? zone : undefined,
+        eventDate,
+        notes: notes.trim() || undefined,
+        payment: {
+          id: `pay-${code}`,
+          type: paymentPlan,
+          method: payMethod,
+          amount: amountDue,
+          status: "success",
+          mpesaReceipt: receipt ?? undefined,
+          phone: isMobileMoney ? parseKenyanPhone(mpesaPhone)?.formatted : undefined,
+          date: new Date().toISOString(),
+        },
+      })
+    );
     clearCart();
     const params = new URLSearchParams({
-      code: orderCode ?? "PB-00000",
+      code,
       receipt: receipt ?? "",
       amount: String(amountDue),
       plan: paymentPlan,
@@ -471,38 +558,78 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* M-PESA */}
+          {/* Payment method */}
           <Card className="gap-5 p-6">
             <CardHeader className="p-0">
               <CardTitle className="flex items-center gap-2">
                 <span className="flex size-6 items-center justify-center rounded-full bg-berry text-xs text-primary-foreground">
                   4
                 </span>
-                Pay with M-PESA
+                Payment Method
               </CardTitle>
-              <CardDescription>
-                We&apos;ll send a Lipa na M-PESA prompt straight to your phone.
-              </CardDescription>
+              <CardDescription>{PAY_METHODS[payMethod].blurb}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4 p-0">
-              <div className="flex flex-col gap-1.5 sm:max-w-xs">
-                <Label htmlFor="mpesaPhone">M-PESA phone number</Label>
-                <div className="relative">
-                  <Smartphone className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-                  <Input
-                    id="mpesaPhone"
-                    value={mpesaPhone}
-                    onChange={(e) => setMpesaPhone(e.target.value)}
-                    placeholder="0712 345 678"
-                    className="pl-10"
-                    aria-invalid={!!errors.mpesaPhone}
-                    data-error={!!errors.mpesaPhone}
-                  />
-                </div>
-                {errors.mpesaPhone && (
-                  <p className="text-xs text-destructive">{errors.mpesaPhone}</p>
-                )}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {(Object.keys(PAY_METHODS) as PaymentMethod[]).map((m) => {
+                  const meta = PAY_METHODS[m];
+                  const Icon = meta.icon;
+                  const active = payMethod === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setPayMethod(m)}
+                      aria-pressed={active}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center transition-colors",
+                        active
+                          ? "border-berry bg-blush/60 ring-1 ring-berry"
+                          : "border-border hover:border-berry/40 hover:bg-secondary/60"
+                      )}
+                    >
+                      <Icon className={cn("size-5", active ? "text-berry" : "text-muted-foreground")} />
+                      <span className="text-xs font-semibold text-foreground">{meta.label}</span>
+                    </button>
+                  );
+                })}
               </div>
+
+              {isMobileMoney ? (
+                <div className="flex flex-col gap-1.5 sm:max-w-xs">
+                  <Label htmlFor="mpesaPhone">{PAY_METHODS[payMethod].label} phone number</Label>
+                  <div className="relative">
+                    <Smartphone className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
+                    <Input
+                      id="mpesaPhone"
+                      inputMode="tel"
+                      value={mpesaPhone}
+                      onChange={(e) => setMpesaPhone(e.target.value)}
+                      placeholder={payMethod === "mpesa" ? "0712 345 678" : "0733 123 456"}
+                      className="pl-10"
+                      aria-invalid={!!errors.mpesaPhone}
+                      data-error={!!errors.mpesaPhone}
+                    />
+                  </div>
+                  {errors.mpesaPhone ? (
+                    <p className="text-xs text-destructive">{errors.mpesaPhone}</p>
+                  ) : (
+                    detectedCarrier && (
+                      <p className="text-xs text-success">
+                        Detected {CARRIER_LABEL[detectedCarrier]} &middot;{" "}
+                        {parseKenyanPhone(mpesaPhone)?.formatted}
+                      </p>
+                    )
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <p className="text-sm text-muted-foreground">
+                    You&apos;ll be redirected to a secure Pesapal page to complete payment.
+                    We never see or store your {payMethod === "card" ? "card" : "PayPal"} details.
+                  </p>
+                </div>
+              )}
 
               <div className="rounded-xl border border-gold/30 bg-gold/10 p-4">
                 <p className="text-sm font-semibold text-foreground">
@@ -516,13 +643,15 @@ export default function CheckoutPage() {
               </div>
 
               <Button size="lg" className="w-full sm:w-auto" onClick={openStkFlow}>
-                <Smartphone className="size-4" />
-                Pay {formatKes(amountDue)} with M-PESA
+                {React.createElement(PAY_METHODS[payMethod].icon, { className: "size-4" })}
+                Pay {formatKes(amountDue)} with {PAY_METHODS[payMethod].label}
               </Button>
 
               <p className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="size-3.5 text-berry" />
-                Payments secured via Safaricom Daraja API. We never store your M-PESA PIN.
+                {isMobileMoney
+                  ? "Payments secured via Safaricom Daraja API. We never store your PIN."
+                  : "Card and PayPal payments are processed securely by Pesapal."}
               </p>
             </CardContent>
           </Card>
@@ -611,7 +740,7 @@ export default function CheckoutPage() {
           setStkOpen(open);
         }}
         phase={stkPhase}
-        phone={normalizePhone(mpesaPhone)}
+        phone={parseKenyanPhone(mpesaPhone)?.formatted ?? mpesaPhone}
         amount={amountDue}
         receipt={receipt}
         orderCode={orderCode}

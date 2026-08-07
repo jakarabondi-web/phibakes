@@ -53,7 +53,10 @@ export function StepEventInfo({
               />
             </div>
             <div>
-              <Label htmlFor="guests">Guest count</Label>
+              <Label htmlFor="guests">
+                Guest count{" "}
+                <span className="font-normal text-muted-foreground">(optional)</span>
+              </Label>
               <Input
                 id="guests"
                 type="number"
@@ -63,6 +66,9 @@ export function StepEventInfo({
                 value={value.guests}
                 onChange={(e) => onChange({ ...value, guests: e.target.value })}
               />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Helps us sanity-check the size you picked — skip it if you&apos;re unsure.
+              </p>
             </div>
           </div>
 

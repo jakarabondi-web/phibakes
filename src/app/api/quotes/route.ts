@@ -13,7 +13,7 @@ const createQuoteSchema = z.object({
   filling: z.string().min(1),
   decoration: z.string().min(1),
   eventDate: z.string().min(1),
-  guests: z.number().int().positive(),
+  guests: z.number().int().positive().optional(),
   specialInstructions: z.string().optional(),
   referenceImages: z.array(z.string()).optional().default([]),
 });
@@ -28,7 +28,7 @@ function generateQuoteCode() {
  * Real quotes are still reviewed & finalised by staff (quotedPrice on the Quote model) —
  * this only gives the customer an immediate ballpark on submission.
  */
-export function estimateQuotePrice(input: { size: string; flavour: string; guests: number; decoration: string }) {
+export function estimateQuotePrice(input: { size: string; flavour: string; guests?: number; decoration: string }) {
   const sizeKey = input.size.toLowerCase();
   let base = 4500; // default / half-kg baseline
   if (sizeKey.includes("multi") || sizeKey.includes("tier")) base = 35000;
@@ -52,7 +52,9 @@ export function estimateQuotePrice(input: { size: string; flavour: string; guest
   if (mediumKeywords.some((k) => decoration.includes(k))) decorationModifier += 2500;
 
   // Guest-count modifier: larger guest counts need larger builds / more servings.
-  const guestModifier = input.guests > 100 ? Math.ceil((input.guests - 100) / 25) * 1000 : 0;
+  // Guest count is optional — with none given, size alone drives the estimate.
+  const guestModifier =
+    input.guests && input.guests > 100 ? Math.ceil((input.guests - 100) / 25) * 1000 : 0;
 
   const estimatedPrice = base + flavourModifier + decorationModifier + guestModifier;
   return Math.round(estimatedPrice / 100) * 100; // round to nearest 100 KES

@@ -319,7 +319,7 @@ model Quote {
   filling              String
   decoration           String
   eventDate            DateTime
-  guests               Int
+  guests               Int?
   status               QuoteStatus @default(PENDING_REVIEW)
   estimatedPrice       Decimal?    @db.Decimal(10, 2)
   quotedPrice          Decimal?    @db.Decimal(10, 2)

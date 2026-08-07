@@ -75,7 +75,9 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                   {active.code} · {active.customerName}
                 </DialogTitle>
                 <DialogDescription>
-                  {active.occasion} for {active.guests} guests on {formatDate(active.eventDate)}
+                  {active.occasion}
+                  {active.guests ? ` for ${active.guests} guests` : ""} on{" "}
+                  {formatDate(active.eventDate)}
                 </DialogDescription>
               </DialogHeader>
 
