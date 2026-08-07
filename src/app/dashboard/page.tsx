@@ -54,9 +54,21 @@ export default function DashboardOverviewPage() {
       />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <KpiCard label="Today's Orders" value={String(stats.todaysOrders)} icon={ClipboardList} delta={12} />
-        <KpiCard label="Revenue" value={formatKes(stats.revenueThisMonth)} icon={Wallet} delta={8.4} />
-        <KpiCard label="Deposits" value={formatKes(stats.depositsCollected)} icon={PiggyBank} delta={10.2} />
+        <KpiCard
+          label="Today's Orders"
+          value={String(stats.todaysOrders)}
+          icon={ClipboardList}
+          delta={12}
+          pastel="lavender"
+        />
+        <KpiCard label="Revenue" value={formatKes(stats.revenueThisMonth)} icon={Wallet} delta={8.4} pastel="mint" />
+        <KpiCard
+          label="Deposits"
+          value={formatKes(stats.depositsCollected)}
+          icon={PiggyBank}
+          delta={10.2}
+          pastel="pink"
+        />
         <KpiCard
           label="Outstanding"
           value={formatKes(stats.outstandingBalance)}

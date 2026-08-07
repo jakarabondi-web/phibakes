@@ -74,6 +74,59 @@
   --ring: var(--gold);
 }
 
+/* ---------------------------------------------------------------------- */
+/* Owner console — "Soft Studio" scoped theme                              */
+/* Pastel canvas, rounder cards, near-borderless surfaces. Scoped to       */
+/* .dashboard-shell so the storefront and account portal are untouched.   */
+/* ---------------------------------------------------------------------- */
+.dashboard-shell {
+  --radius-lg: 1.25rem;
+  --radius-dashboard: 1.375rem;
+  --shadow-card: 0 14px 32px -10px rgba(113, 21, 45, 0.13), 0 2px 8px rgba(113, 21, 45, 0.05);
+  --border: #f2e4ea;
+  --card: #fffefe;
+  --dashboard-canvas: linear-gradient(160deg, #fdf2f6 0%, #f7f1fb 42%, #f1f6f4 100%);
+
+  --pastel-pink: #fceaf1;
+  --pastel-pink-fg: #9c2f57;
+  --pastel-pink-icon: #f6c7da;
+  --pastel-mint: #eaf6ef;
+  --pastel-mint-fg: #2f7a55;
+  --pastel-mint-icon: #c7e9d6;
+  --pastel-lavender: #f1eefb;
+  --pastel-lavender-fg: #6b4fa3;
+  --pastel-lavender-icon: #dad2f6;
+  --pastel-peach: #fdf1e4;
+  --pastel-peach-fg: #a6650f;
+  --pastel-peach-icon: #f6dbb8;
+  --pastel-coral: #fbeaea;
+  --pastel-coral-fg: #a63a3a;
+  --pastel-coral-icon: #f5c9c9;
+}
+
+.dark .dashboard-shell {
+  --shadow-card: 0 16px 32px -10px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
+  --border: #332831;
+  --card: #241e28;
+  --dashboard-canvas: linear-gradient(160deg, #201a22 0%, #1d1a24 45%, #191d1c 100%);
+
+  --pastel-pink: #2b1e26;
+  --pastel-pink-fg: #f3a9c4;
+  --pastel-pink-icon: #4a2c3b;
+  --pastel-mint: #1b2a22;
+  --pastel-mint-fg: #8fd6ac;
+  --pastel-mint-icon: #2c4636;
+  --pastel-lavender: #231f2e;
+  --pastel-lavender-fg: #c3aef2;
+  --pastel-lavender-icon: #3a3350;
+  --pastel-peach: #2c2419;
+  --pastel-peach-fg: #eab567;
+  --pastel-peach-icon: #4a3a22;
+  --pastel-coral: #2c1d1d;
+  --pastel-coral-fg: #f0a3a3;
+  --pastel-coral-icon: #4a2c2c;
+}
+
 @theme inline {
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-inter);
