@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingBag, UserRound, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,12 +19,15 @@ const NAV_LINKS = [
 
 function Wordmark() {
   return (
-    <Link
-      href="/"
-      className="whitespace-nowrap font-display text-xl font-semibold text-primary"
-    >
-      <span className="italic">Phi</span>
-      <span className="not-italic">Bakes</span>
+    <Link href="/" className="flex shrink-0 items-center" aria-label="PhiBakes home">
+      <Image
+        src="/images/brand/phibakes-logo-mark.png"
+        alt="PhiBakes — Cakes, Love, Memories"
+        width={1492}
+        height={1022}
+        priority
+        className="h-20 w-auto sm:h-24 lg:h-28"
+      />
     </Link>
   );
 }
@@ -69,7 +73,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
       <div className="relative mx-auto max-w-6xl">
-        <div className="flex items-center justify-between gap-3 rounded-full border border-border/80 bg-background/80 py-2 pl-5 pr-2 shadow-[0_10px_30px_rgba(91,35,49,0.10)] backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+        <div className="flex items-center justify-between gap-3 rounded-full border border-border/80 bg-background/80 py-2 pl-4 pr-2 shadow-[0_10px_30px_rgba(91,35,49,0.10)] backdrop-blur-md supports-[backdrop-filter]:bg-background/70 sm:pl-5">
           <Wordmark />
 
           <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
