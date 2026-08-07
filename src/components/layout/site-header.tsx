@@ -23,10 +23,10 @@ function Wordmark() {
       <Image
         src="/images/brand/phibakes-logo-mark.png"
         alt="PhiBakes — Cakes, Love, Memories"
-        width={1492}
-        height={1022}
+        width={1000}
+        height={358}
         priority
-        className="h-16 w-auto sm:h-24 lg:h-28"
+        className="h-14 w-auto sm:h-20 lg:h-24"
       />
     </Link>
   );
