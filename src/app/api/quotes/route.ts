@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { QUOTES } from "@/lib/data/quotes";
+import { isDatabaseConfigured, logDbFallback } from "@/lib/db-status";
 import type { Quote } from "@/types";
 
 const createQuoteSchema = z.object({
@@ -94,8 +95,12 @@ export async function POST(request: NextRequest) {
   const code = generateQuoteCode();
   const estimatedPrice = estimateQuotePrice(data);
 
+  // A quote without a customerId is a guest request, not a failure — it has no
+  // row to attach to, so it takes the synthesized path even with a live database.
+  const isGuestRequest = !data.customerId;
+
   try {
-    if (!data.customerId) throw new Error("No customerId — use mock path");
+    if (!data.customerId) throw new Error("Guest quote — no customer row to attach to");
 
     const quote = await prisma.quote.create({
       data: {
@@ -116,7 +121,18 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ source: "db", quote }, { status: 201 });
-  } catch {
+  } catch (err) {
+    // With a real database connected, a failed write must not look like success:
+    // returning a mock quote would hand the customer a code for a record that
+    // doesn't exist. Only synthesize one while the database is still unwired.
+    if (!isGuestRequest && isDatabaseConfigured()) {
+      logDbFallback("quote.create", err);
+      return NextResponse.json(
+        { error: "Could not save your quote request. Please try again." },
+        { status: 503 }
+      );
+    }
+
     const now = new Date().toISOString();
     const quote: Quote = {
       id: `mock-${code}`,
