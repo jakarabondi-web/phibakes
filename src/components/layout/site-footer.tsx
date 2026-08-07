@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { InstagramIcon, FacebookIcon, TiktokIcon } from "@/components/site/social-icons";
 
@@ -44,11 +45,19 @@ export function SiteFooter() {
       <div className="container-luxe py-16">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="flex items-center">
-              <span className="font-display text-2xl font-semibold text-primary-foreground">
-                <span className="italic">Phi</span>
-                <span className="not-italic">Bakes</span>
-              </span>
+            {/* The stacked emblem's maroon script needs a light ground on the berry footer */}
+            <Link
+              href="/"
+              className="inline-flex items-center rounded-2xl bg-cream px-5 py-3"
+              aria-label="PhiBakes home"
+            >
+              <Image
+                src="/images/brand/phibakes-logo-stacked.png"
+                alt="PhiBakes — Cakes, Love, Memories"
+                width={1492}
+                height={1022}
+                className="h-28 w-auto"
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-primary-foreground/70">
               Handcrafted cakes made with love in Nairobi — for weddings, birthdays, and every
