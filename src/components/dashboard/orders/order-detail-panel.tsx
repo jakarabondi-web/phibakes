@@ -3,8 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { MapPin, Store, Wallet, CreditCard, Banknote, Check, ChevronRight } from "lucide-react";
-import type { Order } from "@/types";
+import { MapPin, Store, Wallet, CreditCard, Banknote, Check, ChevronRight, type LucideIcon } from "lucide-react";
+import type { Order, PaymentRecord } from "@/types";
 import { ORDER_STATUS_FLOW } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -17,7 +17,13 @@ import { OrderStatusBadge } from "@/components/dashboard/status-badge";
 import { formatDate, formatDateTime, formatKes } from "@/lib/utils";
 import { STAFF_NAMES } from "@/lib/data/staff";
 
-const PAYMENT_ICON = { mpesa: Wallet, card: CreditCard, cash: Banknote } as const;
+const PAYMENT_ICON: Record<PaymentRecord["method"], LucideIcon> = {
+  mpesa: Wallet,
+  airtel: Wallet,
+  card: CreditCard,
+  paypal: CreditCard,
+  cash: Banknote,
+};
 
 export function OrderDetailPanel({ order }: { order: Order }) {
   const [status, setStatus] = React.useState(order.status);

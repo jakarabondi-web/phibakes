@@ -108,7 +108,7 @@ export type OrderItem = {
 export type PaymentRecord = {
   id: string;
   type: "deposit" | "balance" | "full";
-  method: "mpesa" | "card" | "cash";
+  method: "mpesa" | "airtel" | "card" | "paypal" | "cash";
   amount: number;
   status: "pending" | "success" | "failed";
   mpesaReceipt?: string;
@@ -153,7 +153,7 @@ export type Quote = {
   filling: string;
   decoration: string;
   eventDate: string;
-  guests: number;
+  guests?: number;
   status: QuoteStatus;
   estimatedPrice?: number;
   quotedPrice?: number;

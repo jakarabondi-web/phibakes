@@ -52,9 +52,11 @@ export function QuotesView({ quotes }: { quotes: Quote[] }) {
               <span className="flex items-center gap-1.5">
                 <CalendarDays className="size-3.5" /> Event {formatDate(q.eventDate)}
               </span>
-              <span className="flex items-center gap-1.5">
-                <Users className="size-3.5" /> {q.guests} guests
-              </span>
+              {q.guests ? (
+                <span className="flex items-center gap-1.5">
+                  <Users className="size-3.5" /> {q.guests} guests
+                </span>
+              ) : null}
               <span className="flex items-center gap-1.5">
                 <IceCreamCone className="size-3.5" /> {q.flavour}
               </span>
@@ -93,7 +95,7 @@ export function QuotesView({ quotes }: { quotes: Quote[] }) {
                 </DetailRow>
                 <DetailRow label="Event Date" value={formatDate(selected.eventDate)} />
                 <DetailRow label="Size" value={selected.size} />
-                <DetailRow label="Guests" value={String(selected.guests)} />
+                <DetailRow label="Guests" value={selected.guests ? String(selected.guests) : "Not specified"} />
                 <DetailRow label="Flavour" value={selected.flavour} />
                 <DetailRow label="Filling" value={selected.filling} />
               </div>

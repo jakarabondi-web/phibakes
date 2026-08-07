@@ -1,6 +1,7 @@
 "use client";
 
-import { Wallet, CreditCard, Banknote, RefreshCw } from "lucide-react";
+import { Wallet, CreditCard, Banknote, RefreshCw, type LucideIcon } from "lucide-react";
+import type { PaymentRecord } from "@/types";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,13 @@ import { formatDateTime, formatKes } from "@/lib/utils";
 import { PaymentStatusBadge } from "../_components/status-badge";
 import type { FlatPayment } from "../_lib/customer";
 
-const METHOD_ICON = { mpesa: Wallet, card: CreditCard, cash: Banknote };
+const METHOD_ICON: Record<PaymentRecord["method"], LucideIcon> = {
+  mpesa: Wallet,
+  airtel: Wallet,
+  card: CreditCard,
+  paypal: CreditCard,
+  cash: Banknote,
+};
 
 export function PaymentsView({
   payments,
