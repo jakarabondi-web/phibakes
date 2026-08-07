@@ -4,9 +4,10 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, ShoppingBag, UserRound, ArrowRight } from "lucide-react";
+import { Menu, X, ShoppingBag, UserRound, ArrowRight, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+import { useFavourites } from "@/lib/favourites-context";
 
 const NAV_LINKS = [
   { label: "Cakes", href: "/cakes" },
@@ -44,6 +45,7 @@ function Wordmark() {
 export function SiteHeader() {
   const pathname = usePathname();
   const { itemCount } = useCart();
+  const { count: favouriteCount } = useFavourites();
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
@@ -105,6 +107,18 @@ export function SiteHeader() {
             <UserRound className="size-[19px]" strokeWidth={1.8} />
           </Link>
           <Link
+            href="/favourites"
+            aria-label={`Favourites${favouriteCount > 0 ? ` (${favouriteCount} saved)` : ""}`}
+            className="relative hidden size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-blush hover:text-primary sm:inline-flex"
+          >
+            <Heart className="size-[19px]" strokeWidth={1.8} />
+            {favouriteCount > 0 && (
+              <span className="absolute right-0.5 top-0.5 flex size-4 items-center justify-center rounded-full bg-berry text-[10px] font-bold text-primary-foreground">
+                {favouriteCount}
+              </span>
+            )}
+          </Link>
+          <Link
             href="/cart"
             aria-label={`Cart${itemCount > 0 ? ` (${itemCount} items)` : ""}`}
             className="relative inline-flex size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-blush hover:text-primary"
@@ -162,6 +176,14 @@ export function SiteHeader() {
             ))}
           </nav>
           <div className="flex gap-2 px-3.5 pb-3.5">
+            <Link
+              href="/favourites"
+              onClick={() => setOpen(false)}
+              className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl border border-border bg-cream text-xs font-semibold uppercase tracking-wide text-primary"
+            >
+              <Heart className="size-3.5" />
+              Saved{favouriteCount > 0 ? ` (${favouriteCount})` : ""}
+            </Link>
             <Link
               href="/login"
               onClick={() => setOpen(false)}

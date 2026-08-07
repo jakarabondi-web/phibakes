@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatKes, cn } from "@/lib/utils";
 import type { Cake } from "@/types";
+import { FavouriteButton } from "./favourite-button";
 
 export function CakeCard({ cake, className }: { cake: Cake; className?: string }) {
   return (
@@ -25,13 +26,14 @@ export function CakeCard({ cake, className }: { cake: Cake; className?: string }
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 pr-12">
           {cake.tags.slice(0, 2).map((tag) => (
             <Badge key={tag} variant="gold" className="bg-cream/90 text-berry backdrop-blur-sm">
               {tag}
             </Badge>
           ))}
         </div>
+        <FavouriteButton cake={cake} className="absolute right-3 top-3 z-10" />
         {!cake.available && (
           <div className="absolute inset-0 flex items-center justify-center bg-charcoal/50 backdrop-blur-[1px]">
             <Badge variant="destructive" className="bg-cream text-error">

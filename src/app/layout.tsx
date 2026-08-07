@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/cart-context";
+import { FavouritesProvider } from "@/lib/favourites-context";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -63,8 +64,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <CartProvider>
-            {children}
-            <Toaster position="bottom-right" richColors closeButton />
+            <FavouritesProvider>
+              {children}
+              <Toaster position="bottom-right" richColors closeButton />
+            </FavouritesProvider>
           </CartProvider>
         </ThemeProvider>
       </body>

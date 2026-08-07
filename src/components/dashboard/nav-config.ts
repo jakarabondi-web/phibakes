@@ -18,6 +18,7 @@ import {
   Bike,
   Settings,
   ScrollText,
+  ShoppingCart,
 } from "lucide-react";
 
 export type NavItem = {
@@ -43,6 +44,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Quotes", href: "/dashboard/quotes", icon: FileText },
       { label: "Customers", href: "/dashboard/customers", icon: Users },
       { label: "Payments", href: "/dashboard/payments", icon: Wallet },
+      { label: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: ShoppingCart },
     ],
   },
   {

@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-context";
 import { cn, formatKes } from "@/lib/utils";
+import { SavedCartsPanel } from "@/components/site/saved-carts-panel";
+import { recordCartActivity } from "@/lib/saved-carts";
 
 const PROMO_CODE = "SWEET10";
 const PROMO_DISCOUNT = 0.1;
@@ -22,6 +24,16 @@ export default function CartPage() {
   const [promoInput, setPromoInput] = React.useState("");
   const [appliedPromo, setAppliedPromo] = React.useState<string | null>(null);
   const [promoError, setPromoError] = React.useState<string | null>(null);
+
+  // Stamp the cart's last activity so the customer can resume where they left
+  // off, and so staff can spot carts that went quiet with items still in them.
+  React.useEffect(() => {
+    recordCartActivity({
+      itemCount: items.reduce((n, i) => n + i.quantity, 0),
+      subtotal,
+      lastStage: "cart",
+    });
+  }, [items, subtotal]);
 
   const discount = appliedPromo ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
   const estimatedDeliveryFee = items.length > 0 ? ESTIMATED_DELIVERY_FEE : 0;
@@ -59,6 +71,9 @@ export default function CartPage() {
               Browse Cakes <ArrowRight className="size-4" />
             </Link>
           </Button>
+        </div>
+        <div className="mx-auto mt-6 max-w-md">
+          <SavedCartsPanel />
         </div>
       </section>
     );
@@ -152,6 +167,10 @@ export default function CartPage() {
           <Button variant="outline" asChild className="mt-2 w-fit">
             <Link href="/cakes">Continue Browsing</Link>
           </Button>
+
+          <div className="mt-2">
+            <SavedCartsPanel />
+          </div>
         </div>
 
         {/* Order summary */}
