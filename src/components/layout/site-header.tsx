@@ -19,14 +19,14 @@ const NAV_LINKS = [
 
 function Wordmark() {
   return (
-    <Link href="/" className="flex shrink-0 items-center" aria-label="PhiBakes home">
+    <Link href="/" className="relative z-10 flex shrink-0 items-center" aria-label="PhiBakes home">
       <Image
         src="/images/brand/phibakes-logo-mark.png"
         alt="PhiBakes — Cakes, Love, Memories"
         width={1492}
         height={1022}
         priority
-        className="h-24 w-auto sm:h-28 lg:h-32 xl:h-36"
+        className="h-24 w-auto sm:h-[168px] lg:h-48 xl:h-[216px]"
       />
     </Link>
   );
@@ -34,9 +34,12 @@ function Wordmark() {
 
 /**
  * Classic flush header (Option A): a solid, full-width bar with a hairline
- * bottom border — no floating pill, no rounded canvas. The logo sits large
- * and unconstrained on the left; nav, account/cart, and CTA sit inline on
- * the right. Below xl, nav collapses into a full-width dropdown sheet.
+ * bottom border — no floating pill, no rounded canvas. The row itself keeps
+ * a fixed, compact height so the logo's size never affects the menu's
+ * layout — the logo is simply taller than the row and overflows visually
+ * below it, like a badge hanging over a slim bar. Nav, account/cart, and
+ * CTA sit inline on the right. Below 2xl, nav collapses into a full-width
+ * dropdown sheet.
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -73,16 +76,16 @@ export function SiteHeader() {
 
   return (
     <header ref={menuRef} className="sticky top-0 z-40 border-b border-border bg-background shadow-[0_2px_16px_rgba(91,35,49,0.06)]">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6 lg:h-24 lg:px-8">
         <Wordmark />
 
-        <nav className="hidden items-center gap-0.5 xl:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-0.5 2xl:flex" aria-label="Primary">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors",
                 isActive(link.href)
                   ? "bg-primary text-primary-foreground"
                   : "text-foreground/80 hover:bg-blush hover:text-primary"
@@ -124,7 +127,7 @@ export function SiteHeader() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-blush xl:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-blush 2xl:hidden"
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -134,7 +137,7 @@ export function SiteHeader() {
       {/* Mobile dropdown sheet — full-width, drops from the flush header */}
       <div
         className={cn(
-          "overflow-hidden border-t border-border bg-background transition-[grid-template-rows] duration-200 xl:hidden",
+          "overflow-hidden border-t border-border bg-background transition-[grid-template-rows] duration-200 2xl:hidden",
           "grid",
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
