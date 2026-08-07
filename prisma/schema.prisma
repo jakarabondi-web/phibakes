@@ -26,25 +26,25 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  phone         String?   @unique
-  passwordHash  String?
-  name          String
-  avatarUrl     String?
-  role          UserRole  @default(CUSTOMER)
-  emailVerified DateTime?
-  twoFactorEnabled Boolean @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  email            String    @unique
+  phone            String?   @unique
+  passwordHash     String?
+  name             String
+  avatarUrl        String?
+  role             UserRole  @default(CUSTOMER)
+  emailVerified    DateTime?
+  twoFactorEnabled Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  customer      Customer?
-  staff         Staff?
-  permissions   UserPermission[]
-  notifications Notification[]
-  messagesSent  Message[]        @relation("MessageSender")
-  auditLogs     AuditLog[]
-  reviews       Review[]
+  customer       Customer?
+  staff          Staff?
+  permissions    UserPermission[]
+  notifications  Notification[]
+  messagesSent   Message[]            @relation("MessageSender")
+  auditLogs      AuditLog[]
+  reviews        Review[]
   passwordResets PasswordResetToken[]
 
   @@index([role])
@@ -62,13 +62,13 @@ model Permission {
 /// Only a SHA-256 hash of the token is stored, so a leaked database dump can't
 /// be used to reset anyone's password.
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String   @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
@@ -84,6 +84,52 @@ model UserPermission {
 }
 
 // ---------------------------------------------------------------------------
+// Platform settings (super-admin editable)
+// ---------------------------------------------------------------------------
+
+/// Single-row store of business-wide settings the owner can edit at runtime.
+/// Kept as one row (id = "singleton") rather than a key/value bag so each
+/// setting keeps a real type and a default.
+model PlatformSettings {
+  id            String @id @default("singleton")
+  businessName  String @default("PhiBakes")
+  supportEmail  String @default("hello@phibakes.co.ke")
+  supportPhone  String @default("+254 700 123 456")
+  studioAddress String @default("PhiBakes Studio, Kilimani Ring Road, off Argwings Kodhek, Nairobi")
+  studioHours   String @default("Mon - Sat, 8:00am - 7:00pm  ·  Sun, 10:00am - 4:00pm")
+
+  /// Percentage taken as a deposit at checkout, 0-100.
+  depositPercent    Int      @default(50)
+  /// Production points the kitchen can absorb per day.
+  dailyCapacity     Int      @default(12)
+  /// Minimum lead time before an event date, in hours.
+  minLeadTimeHours  Int      @default(24)
+  /// Free delivery above this order value; null disables the threshold.
+  freeDeliveryAbove Decimal? @db.Decimal(10, 2)
+  /// VAT/tax percentage applied at checkout, 0-100.
+  taxPercent        Int      @default(0)
+  currency          String   @default("KES")
+  acceptingOrders   Boolean  @default(true)
+
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+}
+
+/// Delivery zones and their fees — editable so the owner can reprice routes
+/// without a code change. The storefront reads these at checkout.
+model DeliveryZoneRate {
+  id         String   @id @default(cuid())
+  zone       String   @unique
+  fee        Decimal  @db.Decimal(10, 2)
+  etaMinutes Int      @default(60)
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// ---------------------------------------------------------------------------
 // Customers & Staff
 // ---------------------------------------------------------------------------
 
@@ -95,24 +141,24 @@ enum LoyaltyTier {
 }
 
 model Customer {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  loyaltyPoints  Int      @default(0)
-  tier           LoyaltyTier @default(BRONZE)
-  referralCode   String   @unique @default(cuid())
-  referredById   String?
-  createdAt      DateTime @default(now())
+  id            String      @id @default(cuid())
+  userId        String      @unique
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loyaltyPoints Int         @default(0)
+  tier          LoyaltyTier @default(BRONZE)
+  referralCode  String      @unique @default(cuid())
+  referredById  String?
+  createdAt     DateTime    @default(now())
 
-  addresses      Address[]
-  orders         Order[]
-  quotes         Quote[]
-  invoices       Invoice[]
-  payments       Payment[]
-  reviews        Review[]  @relation("CustomerReviews")
-  wishlist       WishlistItem[]
-  coupons        CouponRedemption[]
-  rewards        RewardTransaction[]
+  addresses Address[]
+  orders    Order[]
+  quotes    Quote[]
+  invoices  Invoice[]
+  payments  Payment[]
+  reviews   Review[]            @relation("CustomerReviews")
+  wishlist  WishlistItem[]
+  coupons   CouponRedemption[]
+  rewards   RewardTransaction[]
 }
 
 enum StaffRole {
@@ -124,33 +170,40 @@ enum StaffRole {
 }
 
 model Staff {
-  id        String    @id @default(cuid())
-  userId    String    @unique
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role      StaffRole
-  isActive  Boolean   @default(true)
-  hiredAt   DateTime  @default(now())
+  id       String    @id @default(cuid())
+  userId   String    @unique
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     StaffRole
+  isActive Boolean   @default(true)
+  hiredAt  DateTime  @default(now())
 
-  assignedOrders     Order[]           @relation("AssignedStaff")
-  productionTasks    ProductionTask[]
-  deliveries         Delivery[]
+  /// Rider-specific dispatch details; null for non-rider roles.
+  vehicleType   String?
+  vehiclePlate  String?
+  /// Deliveries a rider can carry at once.
+  maxConcurrent Int     @default(3)
+  notes         String?
+
+  assignedOrders  Order[]          @relation("AssignedStaff")
+  productionTasks ProductionTask[]
+  deliveries      Delivery[]
 }
 
 model Address {
-  id          String   @id @default(cuid())
-  customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  label       String   // "Home", "Office"
-  line1       String
-  line2       String?
-  city        String   @default("Nairobi")
-  zone        String?  // delivery zone
-  lat         Float?
-  lng         Float?
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label      String // "Home", "Office"
+  line1      String
+  line2      String?
+  city       String   @default("Nairobi")
+  zone       String? // delivery zone
+  lat        Float?
+  lng        Float?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  orders      Order[]
+  orders Order[]
 }
 
 // ---------------------------------------------------------------------------
@@ -158,14 +211,14 @@ model Address {
 // ---------------------------------------------------------------------------
 
 model Category {
-  id          String    @id @default(cuid())
-  slug        String    @unique
+  id          String  @id @default(cuid())
+  slug        String  @unique
   name        String
   description String?
   imageUrl    String?
-  sortOrder   Int       @default(0)
+  sortOrder   Int     @default(0)
 
-  products    Product[]
+  products Product[]
 }
 
 enum CakeSize {
@@ -178,52 +231,52 @@ enum CakeSize {
 }
 
 model Product {
-  id               String   @id @default(cuid())
-  slug             String   @unique
+  id               String     @id @default(cuid())
+  slug             String     @unique
   name             String
   description      String
   categoryId       String
-  category         Category @relation(fields: [categoryId], references: [id])
-  price            Decimal  @db.Decimal(10, 2)
-  compareAtPrice   Decimal? @db.Decimal(10, 2)
+  category         Category   @relation(fields: [categoryId], references: [id])
+  price            Decimal    @db.Decimal(10, 2)
+  compareAtPrice   Decimal?   @db.Decimal(10, 2)
   servings         String
-  prepTimeHours    Int      @default(24)
-  isAvailable      Boolean  @default(true)
-  productionPoints Int      @default(1)
+  prepTimeHours    Int        @default(24)
+  isAvailable      Boolean    @default(true)
+  productionPoints Int        @default(1)
   sizes            CakeSize[]
   flavours         String[]
   images           String[]
   tags             String[]
-  ratingAvg        Float    @default(0)
-  ratingCount      Int      @default(0)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  ratingAvg        Float      @default(0)
+  ratingCount      Int        @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
-  orderItems       OrderItem[]
-  reviews          Review[]
-  wishlistItems    WishlistItem[]
-  recipe           Recipe?
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  recipe        Recipe?
 
   @@index([categoryId])
 }
 
 model Recipe {
-  id          String   @id @default(cuid())
-  productId   String   @unique
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id           String             @id @default(cuid())
+  productId    String             @unique
+  product      Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
   instructions String
-  yieldNotes  String?
-  ingredients RecipeIngredient[]
+  yieldNotes   String?
+  ingredients  RecipeIngredient[]
 }
 
 model RecipeIngredient {
-  id            String        @id @default(cuid())
-  recipeId      String
-  recipe        Recipe        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  id              String        @id @default(cuid())
+  recipeId        String
+  recipe          Recipe        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   inventoryItemId String
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  quantity      Float
-  unit          String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity        Float
+  unit            String
 }
 
 // ---------------------------------------------------------------------------
@@ -252,38 +305,38 @@ enum FulfilmentType {
 }
 
 model Order {
-  id               String        @id @default(cuid())
-  code             String        @unique
+  id               String         @id @default(cuid())
+  code             String         @unique
   customerId       String
-  customer         Customer      @relation(fields: [customerId], references: [id])
+  customer         Customer       @relation(fields: [customerId], references: [id])
   assignedStaffId  String?
-  assignedStaff    Staff?        @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
-  status           OrderStatus   @default(REQUESTED)
+  assignedStaff    Staff?         @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
+  status           OrderStatus    @default(REQUESTED)
   fulfilment       FulfilmentType
   addressId        String?
-  address          Address?      @relation(fields: [addressId], references: [id])
+  address          Address?       @relation(fields: [addressId], references: [id])
   eventDate        DateTime
-  productionPoints Int           @default(1)
-  subtotal         Decimal       @db.Decimal(10, 2)
-  discountAmount   Decimal       @default(0) @db.Decimal(10, 2)
-  deliveryFee      Decimal       @default(0) @db.Decimal(10, 2)
-  total            Decimal       @db.Decimal(10, 2)
-  depositAmount    Decimal       @db.Decimal(10, 2)
+  productionPoints Int            @default(1)
+  subtotal         Decimal        @db.Decimal(10, 2)
+  discountAmount   Decimal        @default(0) @db.Decimal(10, 2)
+  deliveryFee      Decimal        @default(0) @db.Decimal(10, 2)
+  total            Decimal        @db.Decimal(10, 2)
+  depositAmount    Decimal        @db.Decimal(10, 2)
   customerNotes    String?
   internalNotes    String?
   couponId         String?
-  coupon           Coupon?       @relation(fields: [couponId], references: [id])
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  coupon           Coupon?        @relation(fields: [couponId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
-  items            OrderItem[]
-  payments         Payment[]
-  invoices         Invoice[]
-  productionTasks  ProductionTask[]
-  delivery         Delivery?
-  quote            Quote?
-  notifications    Notification[]
-  statusHistory    OrderStatusEvent[]
+  items           OrderItem[]
+  payments        Payment[]
+  invoices        Invoice[]
+  productionTasks ProductionTask[]
+  delivery        Delivery?
+  quote           Quote?
+  notifications   Notification[]
+  statusHistory   OrderStatusEvent[]
 
   @@index([customerId])
   @@index([status])
@@ -300,19 +353,19 @@ model OrderStatusEvent {
 }
 
 model OrderItem {
-  id           String   @id @default(cuid())
-  orderId      String
-  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId    String?
-  product      Product? @relation(fields: [productId], references: [id])
-  nameSnapshot String
-  size         String
-  flavour      String
-  filling      String?
-  decoration   String?
-  quantity     Int      @default(1)
-  unitPrice    Decimal  @db.Decimal(10, 2)
-  isCustom     Boolean  @default(false)
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id])
+  nameSnapshot    String
+  size            String
+  flavour         String
+  filling         String?
+  decoration      String?
+  quantity        Int      @default(1)
+  unitPrice       Decimal  @db.Decimal(10, 2)
+  isCustom        Boolean  @default(false)
   referenceImages String[]
 }
 
@@ -329,22 +382,22 @@ model Quote {
   code                String      @unique
   customerId          String
   customer            Customer    @relation(fields: [customerId], references: [id])
-  occasion             String
-  size                 String
-  flavour              String
-  filling              String
-  decoration           String
-  eventDate            DateTime
-  guests               Int?
-  status               QuoteStatus @default(PENDING_REVIEW)
-  estimatedPrice       Decimal?    @db.Decimal(10, 2)
-  quotedPrice          Decimal?    @db.Decimal(10, 2)
-  specialInstructions  String?
-  referenceImages      String[]
-  convertedOrderId     String?     @unique
-  convertedOrder       Order?      @relation(fields: [convertedOrderId], references: [id])
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
+  occasion            String
+  size                String
+  flavour             String
+  filling             String
+  decoration          String
+  eventDate           DateTime
+  guests              Int?
+  status              QuoteStatus @default(PENDING_REVIEW)
+  estimatedPrice      Decimal?    @db.Decimal(10, 2)
+  quotedPrice         Decimal?    @db.Decimal(10, 2)
+  specialInstructions String?
+  referenceImages     String[]
+  convertedOrderId    String?     @unique
+  convertedOrder      Order?      @relation(fields: [convertedOrderId], references: [id])
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 }
 
 // ---------------------------------------------------------------------------
@@ -371,56 +424,56 @@ enum PaymentStatus {
 }
 
 model Payment {
-  id             String        @id @default(cuid())
-  orderId        String
-  order          Order         @relation(fields: [orderId], references: [id])
-  customerId     String
-  customer       Customer      @relation(fields: [customerId], references: [id])
-  type           PaymentType
-  method         PaymentMethod
-  amount         Decimal       @db.Decimal(10, 2)
-  status         PaymentStatus @default(PENDING)
-  phoneNumber    String?
+  id                     String        @id @default(cuid())
+  orderId                String
+  order                  Order         @relation(fields: [orderId], references: [id])
+  customerId             String
+  customer               Customer      @relation(fields: [customerId], references: [id])
+  type                   PaymentType
+  method                 PaymentMethod
+  amount                 Decimal       @db.Decimal(10, 2)
+  status                 PaymentStatus @default(PENDING)
+  phoneNumber            String?
   mpesaCheckoutRequestId String?
   mpesaReceiptNumber     String?
-  failureReason  String?
-  retryOfId      String?
-  retryOf        Payment?      @relation("PaymentRetry", fields: [retryOfId], references: [id])
-  retries        Payment[]     @relation("PaymentRetry")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  failureReason          String?
+  retryOfId              String?
+  retryOf                Payment?      @relation("PaymentRetry", fields: [retryOfId], references: [id])
+  retries                Payment[]     @relation("PaymentRetry")
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 
-  callbacks      PaymentCallback[]
+  callbacks PaymentCallback[]
 
   @@index([orderId])
   @@index([status])
 }
 
 model PaymentCallback {
-  id             String   @id @default(cuid())
-  paymentId      String
-  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  rawPayload     Json
-  resultCode     Int?
-  resultDesc     String?
-  receivedAt     DateTime @default(now())
+  id         String   @id @default(cuid())
+  paymentId  String
+  payment    Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  rawPayload Json
+  resultCode Int?
+  resultDesc String?
+  receivedAt DateTime @default(now())
 }
 
 model Invoice {
-  id           String   @id @default(cuid())
-  number       String   @unique
-  orderId      String
-  order        Order    @relation(fields: [orderId], references: [id])
-  customerId   String
-  customer     Customer @relation(fields: [customerId], references: [id])
-  subtotal     Decimal  @db.Decimal(10, 2)
-  discount     Decimal  @default(0) @db.Decimal(10, 2)
-  tax          Decimal  @default(0) @db.Decimal(10, 2)
-  total        Decimal  @db.Decimal(10, 2)
-  amountPaid   Decimal  @default(0) @db.Decimal(10, 2)
-  pdfUrl       String?
-  issuedAt     DateTime @default(now())
-  dueAt        DateTime?
+  id         String    @id @default(cuid())
+  number     String    @unique
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id])
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  subtotal   Decimal   @db.Decimal(10, 2)
+  discount   Decimal   @default(0) @db.Decimal(10, 2)
+  tax        Decimal   @default(0) @db.Decimal(10, 2)
+  total      Decimal   @db.Decimal(10, 2)
+  amountPaid Decimal   @default(0) @db.Decimal(10, 2)
+  pdfUrl     String?
+  issuedAt   DateTime  @default(now())
+  dueAt      DateTime?
 }
 
 // ---------------------------------------------------------------------------
@@ -447,17 +500,17 @@ enum NotificationEvent {
 }
 
 model Notification {
-  id        String               @id @default(cuid())
-  userId    String
-  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderId   String?
-  order     Order?               @relation(fields: [orderId], references: [id])
-  channel   NotificationChannel
-  event     NotificationEvent
-  title     String
-  body      String
-  readAt    DateTime?
-  sentAt    DateTime             @default(now())
+  id      String              @id @default(cuid())
+  userId  String
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId String?
+  order   Order?              @relation(fields: [orderId], references: [id])
+  channel NotificationChannel
+  event   NotificationEvent
+  title   String
+  body    String
+  readAt  DateTime?
+  sentAt  DateTime            @default(now())
 }
 
 model Message {
@@ -492,20 +545,20 @@ enum StockStatus {
 }
 
 model InventoryItem {
-  id            String       @id @default(cuid())
-  name          String
-  category      String
-  unit          String
-  quantity      Float
-  reorderLevel  Float
-  costPerUnit   Decimal      @db.Decimal(10, 2)
-  supplierId    String?
-  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
-  expiryDate    DateTime?
-  status        StockStatus  @default(HEALTHY)
-  updatedAt     DateTime     @updatedAt
+  id           String      @id @default(cuid())
+  name         String
+  category     String
+  unit         String
+  quantity     Float
+  reorderLevel Float
+  costPerUnit  Decimal     @db.Decimal(10, 2)
+  supplierId   String?
+  supplier     Supplier?   @relation(fields: [supplierId], references: [id])
+  expiryDate   DateTime?
+  status       StockStatus @default(HEALTHY)
+  updatedAt    DateTime    @updatedAt
 
-  recipeUsages  RecipeIngredient[]
+  recipeUsages RecipeIngredient[]
 }
 
 // ---------------------------------------------------------------------------
@@ -529,16 +582,16 @@ enum TaskStatus {
 }
 
 model ProductionTask {
-  id         String          @id @default(cuid())
-  orderId    String
-  order      Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  stage      ProductionStage
-  staffId    String?
-  staff      Staff?          @relation(fields: [staffId], references: [id])
-  startsAt   DateTime
-  endsAt     DateTime
-  status     TaskStatus      @default(PENDING)
-  notes      String?
+  id       String          @id @default(cuid())
+  orderId  String
+  order    Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stage    ProductionStage
+  staffId  String?
+  staff    Staff?          @relation(fields: [staffId], references: [id])
+  startsAt DateTime
+  endsAt   DateTime
+  status   TaskStatus      @default(PENDING)
+  notes    String?
 
   @@index([orderId])
   @@index([stage])
@@ -553,20 +606,20 @@ enum DeliveryStatus {
 }
 
 model Delivery {
-  id             String         @id @default(cuid())
-  orderId        String         @unique
-  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  riderId        String?
-  rider          Staff?         @relation(fields: [riderId], references: [id])
-  zone           String?
-  fee            Decimal        @default(0) @db.Decimal(10, 2)
-  status         DeliveryStatus @default(PENDING)
-  proofPhotoUrl  String?
-  signatureUrl   String?
-  otpCode        String?
-  otpVerifiedAt  DateTime?
-  dispatchedAt   DateTime?
-  deliveredAt    DateTime?
+  id            String         @id @default(cuid())
+  orderId       String         @unique
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  riderId       String?
+  rider         Staff?         @relation(fields: [riderId], references: [id])
+  zone          String?
+  fee           Decimal        @default(0) @db.Decimal(10, 2)
+  status        DeliveryStatus @default(PENDING)
+  proofPhotoUrl String?
+  signatureUrl  String?
+  otpCode       String?
+  otpVerifiedAt DateTime?
+  dispatchedAt  DateTime?
+  deliveredAt   DateTime?
 }
 
 // ---------------------------------------------------------------------------
@@ -574,19 +627,19 @@ model Delivery {
 // ---------------------------------------------------------------------------
 
 model Review {
-  id           String   @id @default(cuid())
-  productId    String
-  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  customerId   String
-  customer     Customer @relation("CustomerReviews", fields: [customerId], references: [id])
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  rating       Int
-  comment      String
-  photos       String[]
-  isVerified   Boolean  @default(true)
-  ownerReply   String?
-  createdAt    DateTime @default(now())
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation("CustomerReviews", fields: [customerId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  rating     Int
+  comment    String
+  photos     String[]
+  isVerified Boolean  @default(true)
+  ownerReply String?
+  createdAt  DateTime @default(now())
 
   @@index([productId])
 }
@@ -599,19 +652,19 @@ enum CouponType {
 }
 
 model Coupon {
-  id           String     @id @default(cuid())
-  code         String     @unique
-  type         CouponType
-  value        Decimal    @db.Decimal(10, 2)
-  minSpend     Decimal?   @db.Decimal(10, 2)
-  usageLimit   Int?
-  usedCount    Int        @default(0)
-  startsAt     DateTime?
-  expiresAt    DateTime?
-  isActive     Boolean    @default(true)
+  id         String     @id @default(cuid())
+  code       String     @unique
+  type       CouponType
+  value      Decimal    @db.Decimal(10, 2)
+  minSpend   Decimal?   @db.Decimal(10, 2)
+  usageLimit Int?
+  usedCount  Int        @default(0)
+  startsAt   DateTime?
+  expiresAt  DateTime?
+  isActive   Boolean    @default(true)
 
-  orders       Order[]
-  redemptions  CouponRedemption[]
+  orders      Order[]
+  redemptions CouponRedemption[]
 }
 
 model CouponRedemption {
@@ -644,13 +697,13 @@ enum RewardTransactionType {
 }
 
 model RewardTransaction {
-  id         String                 @id @default(cuid())
+  id         String                @id @default(cuid())
   customerId String
-  customer   Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer   Customer              @relation(fields: [customerId], references: [id], onDelete: Cascade)
   type       RewardTransactionType
   points     Int
   reason     String
-  createdAt  DateTime               @default(now())
+  createdAt  DateTime              @default(now())
 }
 
 // ---------------------------------------------------------------------------
