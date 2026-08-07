@@ -82,10 +82,31 @@
 .dashboard-shell {
   --radius-lg: 1.25rem;
   --radius-dashboard: 1.375rem;
-  --shadow-card: 0 14px 32px -10px rgba(113, 21, 45, 0.13), 0 2px 8px rgba(113, 21, 45, 0.05);
-  --border: #f2e4ea;
-  --card: #fffefe;
-  --dashboard-canvas: linear-gradient(160deg, #fdf2f6 0%, #f7f1fb 42%, #f1f6f4 100%);
+  --shadow-card: 0 10px 26px -12px rgba(60, 20, 35, 0.26), 0 2px 6px rgba(60, 20, 35, 0.09);
+  --border: #ddcbc0;
+  --card: #fffefc;
+  --dashboard-canvas: linear-gradient(160deg, #f6efe9 0%, #f3edea 50%, #efefe9 100%);
+  --muted-foreground: #55444a;
+
+  /* Berry sidebar with a gold active pill. Held as tokens so the sidebar and
+     its active state can't drift apart, and so dark mode only overrides these. */
+  --sidebar-bg: #5e1225;
+  --sidebar-fg: #f2e0e5;
+  --sidebar-label: rgba(242, 224, 229, 0.55);
+  --sidebar-hover: rgba(255, 255, 255, 0.09);
+  --sidebar-active-bg: #c99a67;
+  --sidebar-active-fg: #2b0d16;
+
+  /* Table header band — cream with a gold rule. The band plus the rule are what
+     separate the header from the data; without them the header row reads as
+     just another row. */
+  --table-head-bg: #f7ecdc;
+  --table-head-fg: #4a2418;
+  --table-head-rule: #c99a67;
+  --table-head-icon: #9c6b34;
+  --table-row-rule: #ece1d8;
+
+  --heading-fg: #3d0f1e;
 
   --pastel-pink: #fceaf1;
   --pastel-pink-fg: #9c2f57;
@@ -110,6 +131,21 @@
   --card: #241e28;
   --dashboard-canvas: linear-gradient(160deg, #201a22 0%, #1d1a24 45%, #191d1c 100%);
 
+  --sidebar-bg: #1f1419;
+  --sidebar-fg: #f0e2e6;
+  --sidebar-label: rgba(240, 226, 230, 0.5);
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-active-bg: #c99a67;
+  --sidebar-active-fg: #241016;
+
+  --table-head-bg: #2c2229;
+  --table-head-fg: #f2e3d5;
+  --table-head-rule: #c99a67;
+  --table-head-icon: #d8ab78;
+  --table-row-rule: #382c34;
+
+  --heading-fg: #f7ecef;
+
   --pastel-pink: #2b1e26;
   --pastel-pink-fg: #f3a9c4;
   --pastel-pink-icon: #4a2c3b;
@@ -126,6 +162,64 @@
   --pastel-coral-fg: #f0a3a3;
   --pastel-coral-icon: #4a2c2c;
 }
+
+/* Dashboard heading hierarchy — four distinct steps so headings never read as
+   slightly-different body text: page title, card title, table header, body. */
+.dashboard-shell h1 {
+  font-size: 2.15rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--heading-fg);
+}
+
+.dashboard-shell h2,
+.dashboard-shell h3,
+.dashboard-shell [data-slot="card-title"] {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--heading-fg);
+}
+
+.dashboard-shell thead tr {
+  background: var(--table-head-bg);
+}
+
+/* Sortable columns nest their label inside a button, so both the cell and the
+   button must be styled or those columns render lighter than the rest. */
+.dashboard-shell table th,
+.dashboard-shell table th button {
+  color: var(--table-head-fg);
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dashboard-shell table th {
+  height: 3rem;
+  border-bottom: 2.5px solid var(--table-head-rule);
+}
+
+.dashboard-shell table th svg {
+  color: var(--table-head-icon);
+  opacity: 1;
+}
+
+.dashboard-shell tbody tr {
+  border-bottom: 1px solid var(--table-row-rule);
+}
+
+/* The order code and customer name are what you scan down a table, so they
+   carry more weight than the surrounding cells. */
+.dashboard-shell tbody td:nth-child(2) {
+  font-weight: 700;
+}
+
+.dashboard-shell tbody td:nth-child(3) {
+  font-weight: 650;
+  color: var(--heading-fg);
+}
+
 
 @theme inline {
   --font-display: var(--font-fraunces);
