@@ -1,6 +1,5 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
+import { isGoogleConfigured } from "@/lib/auth/google";
 
 function GoogleIcon() {
   return (
@@ -25,16 +24,37 @@ function GoogleIcon() {
   );
 }
 
+/**
+ * Server component so it can read whether Google credentials are present. The
+ * flow is fully implemented; without GOOGLE_CLIENT_ID/SECRET the button is
+ * disabled and says why, rather than starting a sign-in that can't complete.
+ */
 export function GoogleButton() {
+  if (!isGoogleConfigured()) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="w-full"
+          disabled
+          title="Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable Google sign-in"
+        >
+          <GoogleIcon /> Continue with Google
+        </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          Google sign-in isn&apos;t configured yet.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="lg"
-      className="w-full"
-      onClick={() => console.log("Google OAuth would start here")}
-    >
-      <GoogleIcon /> Continue with Google
+    <Button asChild variant="outline" size="lg" className="w-full">
+      <a href="/api/auth/google">
+        <GoogleIcon /> Continue with Google
+      </a>
     </Button>
   );
 }

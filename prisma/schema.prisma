@@ -45,6 +45,7 @@ model User {
   messagesSent  Message[]        @relation("MessageSender")
   auditLogs     AuditLog[]
   reviews       Review[]
+  passwordResets PasswordResetToken[]
 
   @@index([role])
 }
@@ -55,6 +56,21 @@ model Permission {
   description String
 
   users UserPermission[]
+}
+
+/// Single-use, expiring tokens for the "forgot password" flow.
+/// Only a SHA-256 hash of the token is stored, so a leaked database dump can't
+/// be used to reset anyone's password.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model UserPermission {
