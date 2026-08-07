@@ -44,6 +44,7 @@ import { cn, formatKes } from "@/lib/utils";
 import { DELIVERY_ZONES, getDeliveryFee, STUDIO_ADDRESS, STUDIO_HOURS } from "@/lib/delivery";
 import { CARRIER_LABEL, kenyanPhoneError, parseKenyanPhone } from "@/lib/kenya-phone";
 import { buildPlacedOrder, savePlacedOrder } from "@/lib/placed-orders";
+import { recordCartActivity, clearCartActivity } from "@/lib/saved-carts";
 
 const PROMO_CODE = "SWEET10";
 const PROMO_DISCOUNT = 0.1;
@@ -141,6 +142,19 @@ export default function CheckoutPage() {
       stkTimers.current.forEach(clearTimeout);
     };
   }, []);
+
+  // Mark that checkout was reached, and keep whatever contact details have been
+  // entered — an abandoned cart is only actionable if staff can reach the person.
+  React.useEffect(() => {
+    recordCartActivity({
+      itemCount: items.reduce((n, i) => n + i.quantity, 0),
+      subtotal,
+      lastStage: "checkout",
+      customerName: name.trim() || undefined,
+      customerEmail: email.trim() || undefined,
+      customerPhone: phone.trim() || undefined,
+    });
+  }, [items, subtotal, name, email, phone]);
 
   const discount = appliedPromo ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
   const deliveryFee = fulfilment === "delivery" ? getDeliveryFee(zone) : 0;
@@ -272,6 +286,7 @@ export default function CheckoutPage() {
       })
     );
     clearCart();
+    clearCartActivity();
     const params = new URLSearchParams({
       code,
       receipt: receipt ?? "",
