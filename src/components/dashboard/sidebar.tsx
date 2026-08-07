@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <div className={cn("bg-primary", collapsed ? "px-2 py-4" : "px-4 py-5")}>
+    <div className={cn("m-2 rounded-2xl bg-primary", collapsed ? "px-2 py-4" : "px-4 py-5")}>
       <Link href="/dashboard" className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold text-charcoal font-display text-base font-bold">
           P
@@ -52,11 +52,11 @@ function NavLinks({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?:
                   onClick={onNavigate}
                   title={collapsed ? item.label : undefined}
                   className={cn(
-                    "group relative flex items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2 text-sm font-medium transition-colors",
+                    "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                     collapsed && "justify-center px-2",
                     active
-                      ? "border-primary bg-blush text-primary"
-                      : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+                      ? "bg-blush text-primary font-semibold shadow-sm"
+                      : "text-foreground/80 hover:bg-secondary/70 hover:text-foreground"
                   )}
                 >
                   <Icon className="size-4 shrink-0" />
@@ -81,17 +81,17 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-background transition-[width] duration-200 lg:flex",
-        collapsed ? "w-[72px]" : "w-64"
+        "sticky top-3 ml-3 hidden h-[calc(100dvh-1.5rem)] shrink-0 flex-col overflow-hidden rounded-3xl bg-card shadow-[var(--shadow-card)] transition-[width] duration-200 lg:flex",
+        collapsed ? "w-[76px]" : "w-64"
       )}
     >
       <Brand collapsed={collapsed} />
       <NavLinks collapsed={collapsed} />
-      <div className="border-t border-border p-2">
+      <div className="p-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-center gap-2 text-muted-foreground"
+          className="w-full justify-center gap-2 rounded-xl text-muted-foreground"
           onClick={onToggle}
         >
           {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}

@@ -35,7 +35,7 @@ export function DashboardTopbar() {
   React.useEffect(() => setMounted(true), []);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-card/80 sm:px-6">
+    <header className="sticky top-3 z-30 mx-3 mt-3 flex h-16 items-center gap-3 rounded-2xl bg-card/95 px-4 shadow-[var(--shadow-card)] backdrop-blur supports-[backdrop-filter]:bg-card/80 sm:px-6">
       <DashboardMobileNav />
 
       <div className="relative hidden max-w-sm flex-1 sm:block">
