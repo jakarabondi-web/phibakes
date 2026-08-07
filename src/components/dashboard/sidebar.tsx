@@ -11,15 +11,15 @@ import { Button } from "@/components/ui/button";
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <div className={cn("m-2 rounded-2xl bg-primary", collapsed ? "px-2 py-4" : "px-4 py-5")}>
+    <div className={cn("m-2 rounded-2xl", collapsed ? "px-2 py-4" : "px-4 py-5")}>
       <Link href="/dashboard" className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold text-charcoal font-display text-base font-bold">
           P
         </span>
         {!collapsed && (
-          <span className="font-display text-lg font-bold leading-none text-primary-foreground">
+          <span className="font-display text-lg font-bold leading-none text-[var(--sidebar-fg)]">
             PhiBakes
-            <span className="block text-[10px] font-sans font-medium tracking-widest text-primary-foreground/70">
+            <span className="block text-[10px] font-sans font-medium tracking-widest text-[var(--sidebar-label)]">
               OWNER CONSOLE
             </span>
           </span>
@@ -36,7 +36,7 @@ function NavLinks({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?:
       {NAV_SECTIONS.map((section) => (
         <div key={section.label}>
           {!collapsed && (
-            <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--sidebar-label)]">
               {section.label}
             </p>
           )}
@@ -55,8 +55,8 @@ function NavLinks({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?:
                     "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                     collapsed && "justify-center px-2",
                     active
-                      ? "bg-blush text-primary font-semibold shadow-sm"
-                      : "text-foreground/80 hover:bg-secondary/70 hover:text-foreground"
+                      ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)] font-semibold shadow-sm"
+                      : "text-[var(--sidebar-fg)]/85 hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-fg)]"
                   )}
                 >
                   <Icon className="size-4 shrink-0" />
@@ -81,7 +81,7 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "sticky top-3 ml-3 hidden h-[calc(100dvh-1.5rem)] shrink-0 flex-col overflow-hidden rounded-3xl bg-card shadow-[var(--shadow-card)] transition-[width] duration-200 lg:flex",
+        "sticky top-3 ml-3 hidden h-[calc(100dvh-1.5rem)] shrink-0 flex-col overflow-hidden rounded-3xl bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] shadow-[var(--shadow-card)] transition-[width] duration-200 lg:flex",
         collapsed ? "w-[76px]" : "w-64"
       )}
     >
@@ -91,7 +91,7 @@ export function DashboardSidebar({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-center gap-2 rounded-xl text-muted-foreground"
+          className="w-full justify-center gap-2 rounded-xl text-[var(--sidebar-fg)]/70 hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-fg)]"
           onClick={onToggle}
         >
           {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}

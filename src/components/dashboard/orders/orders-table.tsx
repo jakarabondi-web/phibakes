@@ -205,10 +205,12 @@ function SortableHead({
     <TableHead>
       <button
         onClick={onClick}
-        className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground"
+        // Matches the plain TableHead styling so sortable and non-sortable
+        // columns read as one header row rather than two different weights.
+        className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground transition-opacity hover:opacity-80"
       >
         {label}
-        <ArrowUpDown className={`size-3 ${active ? "text-foreground" : ""} ${active && dir === -1 ? "rotate-180" : ""}`} />
+        <ArrowUpDown className={`size-3 ${active && dir === -1 ? "rotate-180" : ""}`} />
       </button>
     </TableHead>
   );
