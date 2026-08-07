@@ -50,7 +50,7 @@ type Seed = {
   tags: string[];
   imageIdx: number[];
   available?: boolean;
-  /** Overrides the computed Unsplash `imageIdx` lookup with explicit local paths. */
+  /** Overrides the computed `imageIdx` lookup with explicit local paths. */
   images?: string[];
   /** Overrides the formulaic rating/reviewCount for products with known reference values. */
   rating?: number;
