@@ -8,6 +8,7 @@ import { isDatabaseConfigured } from "@/lib/db-status";
 import { kenyanPhoneError, parseKenyanPhone } from "@/lib/kenya-phone";
 import { createSession, destroySession, landingPathFor, isAuthConfigured } from "./session";
 import { findDemoUserByEmail } from "./demo-users";
+import { verifyOwnerCredentials } from "./owner-account";
 
 export type AuthFormState = {
   error?: string;
@@ -75,6 +76,19 @@ export async function signIn(
 
   const { email, password } = parsed.data;
   const next = safeNext(formData.get("next"));
+
+  // Checked before the database on purpose: the owner must not be locked out of
+  // their own console by a bad migration, an empty user table, or a lost password.
+  const owner = await verifyOwnerCredentials(email, password);
+  if (owner) {
+    await createSession({
+      userId: owner.id,
+      role: owner.role,
+      name: owner.name,
+      email: owner.email,
+    });
+    redirect(next ?? landingPathFor(owner.role));
+  }
 
   if (!isDatabaseConfigured()) {
     const demo = findDemoUserByEmail(email);

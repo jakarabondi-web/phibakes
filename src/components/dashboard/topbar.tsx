@@ -28,7 +28,23 @@ const NOTIFICATIONS = [
   { id: 3, text: "Quote PBQ-5501 awaiting your review", time: "3h ago" },
 ];
 
-export function DashboardTopbar() {
+function titleCaseRole(role?: string) {
+  if (!role) return "Owner";
+  return role
+    .toLowerCase()
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+export function DashboardTopbar({
+  user,
+}: {
+  user?: { name: string; email: string; role: string; avatarUrl?: string | null };
+}) {
+  const displayName = user?.name ?? "Phoina Mwangis";
+  const displayRole = titleCaseRole(user?.role);
+  const displayEmail = user?.email ?? "owner@phibakes.co.ke";
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- standard next-themes hydration guard
@@ -93,15 +109,15 @@ export function DashboardTopbar() {
                 <AvatarFallback>PM</AvatarFallback>
               </Avatar>
               <span className="hidden flex-col items-start leading-tight sm:flex">
-                <span className="text-sm font-medium">Phoina Mwangis</span>
-                <span className="text-[11px] text-muted-foreground">Owner</span>
+                <span className="text-sm font-medium">{displayName}</span>
+                <span className="text-[11px] text-muted-foreground">{displayRole}</span>
               </span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <p className="text-sm font-medium">Phoina Mwangis</p>
-              <p className="text-xs font-normal text-muted-foreground">Owner · owner@phibakes.co.ke</p>
+              <p className="text-sm font-medium">{displayName}</p>
+              <p className="text-xs font-normal text-muted-foreground">{displayRole} · {displayEmail}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
