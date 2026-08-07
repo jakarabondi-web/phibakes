@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { ORDERS } from "@/lib/data/orders";
+import { isDatabaseConfigured, logDbFallback } from "@/lib/db-status";
 import type { Order, OrderStatus } from "@/types";
 
 const orderItemSchema = z.object({
@@ -86,8 +87,12 @@ export async function POST(request: NextRequest) {
   const code = generateOrderCode();
   const fulfilment = data.fulfilment.toUpperCase() as "PICKUP" | "DELIVERY";
 
+  // An order without a customerId is a guest checkout, not a failure — it has no
+  // customer row to attach to, so it takes the synthesized path regardless.
+  const isGuestOrder = !data.customerId;
+
   try {
-    if (!data.customerId) throw new Error("No customerId — cannot resolve DB customer, use mock path");
+    if (!data.customerId) throw new Error("Guest order — no customer row to attach to");
 
     const order = await prisma.order.create({
       data: {
@@ -126,8 +131,18 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ source: "db", order }, { status: 201 });
-  } catch {
-    // No live database (or no resolvable customerId) — synthesize a realistic,
+  } catch (err) {
+    // A failed write against a live database must not return 201 with an order
+    // code — the customer would believe they'd ordered while nothing persisted.
+    if (!isGuestOrder && isDatabaseConfigured()) {
+      logDbFallback("order.create", err);
+      return NextResponse.json(
+        { error: "Could not place your order. Please try again." },
+        { status: 503 }
+      );
+    }
+
+    // No live database (or a guest checkout) — synthesize a realistic,
     // demo-shaped Order matching the frontend's mock `Order` type so the flow keeps working.
     const now = new Date().toISOString();
     const order: Order = {
