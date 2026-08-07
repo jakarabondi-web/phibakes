@@ -22,7 +22,7 @@ export type DemoUser = {
 export const DEMO_USERS: DemoUser[] = [
   {
     id: "demo-owner",
-    name: "Phoina Mwangis",
+    name: "Phinalina Owino",
     email: "owner@phibakes.co.ke",
     password: "demo1234",
     role: "OWNER",

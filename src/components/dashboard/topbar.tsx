@@ -42,7 +42,7 @@ export function DashboardTopbar({
 }: {
   user?: { name: string; email: string; role: string; avatarUrl?: string | null };
 }) {
-  const displayName = user?.name ?? "Phoina Mwangis";
+  const displayName = user?.name ?? "Phinalina Owino";
   const displayRole = titleCaseRole(user?.role);
   const displayEmail = user?.email ?? "owner@phibakes.co.ke";
   const { theme, setTheme } = useTheme();
