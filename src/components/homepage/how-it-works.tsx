@@ -51,7 +51,7 @@ export function HowItWorks() {
                 <div className="relative z-10 size-16 overflow-hidden rounded-full ring-1 ring-primary-foreground/25">
                   <Image src={step.icon} alt="" fill className="object-cover" aria-hidden />
                 </div>
-                <span className="mt-4 text-xs font-semibold uppercase tracking-wider text-gold">
+                <span className="mt-4 text-xs font-semibold uppercase tracking-wider text-gold-on-dark">
                   Step {i + 1}
                 </span>
                 <h3 className="mt-1 font-display text-lg font-semibold">{step.title}</h3>

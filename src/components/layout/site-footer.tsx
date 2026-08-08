@@ -93,7 +93,7 @@ export function SiteFooter() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h4 className="font-display text-sm font-semibold uppercase tracking-wide text-gold">
+              <h4 className="font-display text-sm font-semibold uppercase tracking-wide text-gold-on-dark">
                 {col.title}
               </h4>
               <ul className="mt-4 space-y-2.5">
@@ -112,7 +112,7 @@ export function SiteFooter() {
           ))}
 
           <div>
-            <h4 className="font-display text-sm font-semibold uppercase tracking-wide text-gold">
+            <h4 className="font-display text-sm font-semibold uppercase tracking-wide text-gold-on-dark">
               Contact
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm text-primary-foreground/75">

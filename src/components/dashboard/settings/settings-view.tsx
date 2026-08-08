@@ -183,6 +183,9 @@ export function SettingsView() {
                         checked={matrix[role].has(perm)}
                         disabled={role === "Owner"}
                         onCheckedChange={() => togglePermission(role, perm)}
+                        // Each cell sits at a permission x role intersection; without
+                        // a name a screen reader announces 30 unlabelled checkboxes.
+                        aria-label={`${perm} permission for ${role}`}
                       />
                     </TableCell>
                   ))}
