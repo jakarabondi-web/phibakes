@@ -7,12 +7,10 @@ import { Moon, Sun } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DAILY_CAPACITY } from "@/lib/booking";
 
 const ROLES = ["Owner", "Manager", "Baker", "Rider", "Support"] as const;
 const PERMISSIONS = [
@@ -37,8 +35,6 @@ export function SettingsView() {
   const [mounted, setMounted] = React.useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- standard next-themes hydration guard
   React.useEffect(() => setMounted(true), []);
-
-  const [capacity, setCapacity] = React.useState(String(DAILY_CAPACITY));
   const [matrix, setMatrix] = React.useState(DEFAULT_MATRIX);
   const [notifications, setNotifications] = React.useState({
     email: true,
@@ -58,57 +54,6 @@ export function SettingsView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="p-5">
-        <CardHeader className="p-0">
-          <CardTitle>Business Profile</CardTitle>
-          <CardDescription>Public details shown on the storefront and receipts</CardDescription>
-        </CardHeader>
-        <CardContent className="mt-4 grid grid-cols-1 gap-4 p-0 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="biz-name">Business Name</Label>
-            <Input id="biz-name" defaultValue="PhiBakes Bakery Ltd" className="mt-1.5" />
-          </div>
-          <div>
-            <Label htmlFor="biz-phone">Phone</Label>
-            <Input id="biz-phone" defaultValue="+254 700 123 456" className="mt-1.5" />
-          </div>
-          <div>
-            <Label htmlFor="biz-email">Email</Label>
-            <Input id="biz-email" defaultValue="hello@phibakes.co.ke" className="mt-1.5" />
-          </div>
-          <div>
-            <Label htmlFor="biz-address">Studio Address</Label>
-            <Input id="biz-address" defaultValue="Kilimani, Nairobi, Kenya" className="mt-1.5" />
-          </div>
-          <div className="sm:col-span-2">
-            <Label htmlFor="biz-about">About</Label>
-            <Textarea
-              id="biz-about"
-              defaultValue="Nairobi's premium cake studio for weddings, birthdays, and every celebration in between."
-              className="mt-1.5"
-              rows={3}
-            />
-          </div>
-        </CardContent>
-        <div className="mt-4 flex justify-end">
-          <Button onClick={() => toast.success("Business profile saved")}>Save Profile</Button>
-        </div>
-      </Card>
-
-      <Card className="p-5">
-        <CardHeader className="p-0">
-          <CardTitle>Production Capacity</CardTitle>
-          <CardDescription>Daily production points available before a date is fully booked</CardDescription>
-        </CardHeader>
-        <CardContent className="mt-4 flex items-end gap-3 p-0">
-          <div className="max-w-40">
-            <Label htmlFor="capacity">Points / day</Label>
-            <Input id="capacity" type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)} className="mt-1.5" />
-          </div>
-          <Button onClick={() => toast.success(`Daily capacity set to ${capacity} points/day`)}>Save Capacity</Button>
-        </CardContent>
-      </Card>
-
       <Card className="p-5">
         <CardHeader className="p-0 flex-row items-center gap-2">
           {mounted && theme === "dark" ? <Moon className="size-4 text-berry" /> : <Sun className="size-4 text-gold" />}
