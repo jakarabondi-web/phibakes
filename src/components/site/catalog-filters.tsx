@@ -73,7 +73,7 @@ export function CatalogFilters({ cakes }: { cakes: Cake[] }) {
         </div>
 
         <Select value={category} onValueChange={(v) => setCategory(v as CakeCategorySlug | "all")}>
-          <SelectTrigger size="sm" className="w-full sm:w-44">
+          <SelectTrigger size="sm" aria-label="Filter by category" className="w-full sm:w-44">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
@@ -87,7 +87,7 @@ export function CatalogFilters({ cakes }: { cakes: Cake[] }) {
         </Select>
 
         <Select value={flavour} onValueChange={(v) => setFlavour(v as CakeFlavour | "all")}>
-          <SelectTrigger size="sm" className="w-full sm:w-40">
+          <SelectTrigger size="sm" aria-label="Filter by price" className="w-full sm:w-40">
             <SelectValue placeholder="Flavour" />
           </SelectTrigger>
           <SelectContent>
@@ -101,7 +101,7 @@ export function CatalogFilters({ cakes }: { cakes: Cake[] }) {
         </Select>
 
         <Select value={size} onValueChange={(v) => setSize(v as CakeSize | "all")}>
-          <SelectTrigger size="sm" className="w-full sm:w-36">
+          <SelectTrigger size="sm" aria-label="Sort cakes" className="w-full sm:w-36">
             <SelectValue placeholder="Size" />
           </SelectTrigger>
           <SelectContent>
@@ -116,7 +116,7 @@ export function CatalogFilters({ cakes }: { cakes: Cake[] }) {
 
         <div className="sm:ml-auto sm:flex sm:items-center sm:gap-3">
           <Select value={sort} onValueChange={(v) => setSort(v as SortValue)}>
-            <SelectTrigger size="sm" className="w-full sm:w-48">
+            <SelectTrigger size="sm" aria-label="Filter by occasion" className="w-full sm:w-48">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>

@@ -21,10 +21,14 @@
   --surface-soft: #fbf3f3;
   --chocolate: #4a3028;
   --gold: #c99a67;
+  /* --gold is a fill colour: as text it measures 2.2:1 on cream and 4.5:1 on
+     berry, so it can't pass on both. These two are for text only. */
+  --gold-on-light: #805819; /* 5.5:1 on cream surfaces */
+  --gold-on-dark: #d8b184;  /* 5.7:1 on the berry surfaces */
   --gold-light: #ead4bc;
   --charcoal: #32151d;
-  --success: #3f8b66;
-  --error: #c94e4e;
+  --success: #2f6d50; /* darkened from #3f8b66: 3.66:1 on the mint chip failed AA, this is 5.45:1 */
+  --error: #b23b3b; /* was #c94e4e: 4.03:1 on peach surfaces failed AA, this is 5.27:1 */
   --warning: #d89a35;
 
   --shadow-soft: 0 10px 30px rgba(91, 35, 49, 0.08);
@@ -92,7 +96,7 @@
      its active state can't drift apart, and so dark mode only overrides these. */
   --sidebar-bg: #5e1225;
   --sidebar-fg: #f2e0e5;
-  --sidebar-label: rgba(242, 224, 229, 0.55);
+  --sidebar-label: #d2aeb8; /* 6.6:1 on --sidebar-bg; the old 55% alpha computed to 4.07 */
   --sidebar-hover: rgba(255, 255, 255, 0.09);
   --sidebar-active-bg: #c99a67;
   --sidebar-active-fg: #2b0d16;
@@ -133,7 +137,7 @@
 
   --sidebar-bg: #1f1419;
   --sidebar-fg: #f0e2e6;
-  --sidebar-label: rgba(240, 226, 230, 0.5);
+  --sidebar-label: #cfacb5;
   --sidebar-hover: rgba(255, 255, 255, 0.07);
   --sidebar-active-bg: #c99a67;
   --sidebar-active-fg: #241016;
@@ -254,6 +258,8 @@
   --color-surface-soft: var(--surface-soft);
   --color-chocolate: var(--chocolate);
   --color-gold: var(--gold);
+  --color-gold-on-light: var(--gold-on-light);
+  --color-gold-on-dark: var(--gold-on-dark);
   --color-gold-light: var(--gold-light);
   --color-charcoal: var(--charcoal);
   --color-success: var(--success);

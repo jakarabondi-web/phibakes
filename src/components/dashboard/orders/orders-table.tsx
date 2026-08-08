@@ -83,7 +83,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-52">
+            <SelectTrigger aria-label="Filter orders by status" className="w-full sm:w-52">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
