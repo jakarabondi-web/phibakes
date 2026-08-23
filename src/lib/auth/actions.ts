@@ -8,7 +8,7 @@ import { isDatabaseConfigured } from "@/lib/db-status";
 import { kenyanPhoneError, parseKenyanPhone } from "@/lib/kenya-phone";
 import { createSession, destroySession, landingPathFor, isAuthConfigured } from "./session";
 import { findDemoUserByEmail } from "./demo-users";
-import { verifyOwnerCredentials } from "./owner-account";
+import { ensureOwnerUserRow, verifyOwnerCredentials } from "./owner-account";
 
 export type AuthFormState = {
   error?: string;
@@ -81,13 +81,17 @@ export async function signIn(
   // their own console by a bad migration, an empty user table, or a lost password.
   const owner = await verifyOwnerCredentials(email, password);
   if (owner) {
+    // Once a database exists, sign in as the real row rather than the row-less
+    // env identity — otherwise the owner's own profile stays permanently
+    // read-only. Falls back to the env identity if that can't be done.
+    const account = (await ensureOwnerUserRow(owner)) ?? owner;
     await createSession({
-      userId: owner.id,
-      role: owner.role,
-      name: owner.name,
-      email: owner.email,
+      userId: account.id,
+      role: account.role,
+      name: account.name,
+      email: account.email,
     });
-    redirect(next ?? landingPathFor(owner.role));
+    redirect(next ?? landingPathFor(account.role));
   }
 
   if (!isDatabaseConfigured()) {
