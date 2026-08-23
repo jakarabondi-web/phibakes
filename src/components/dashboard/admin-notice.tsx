@@ -7,9 +7,12 @@ import { Lock, Database } from "lucide-react";
 export function AdminNotice({
   isOwner,
   databaseReady,
+  databaseHint,
 }: {
   isOwner: boolean;
   databaseReady: boolean;
+  /** Why there's no database — see databaseSetupHint(). */
+  databaseHint?: string | null;
 }) {
   if (isOwner && databaseReady) return null;
 
@@ -23,11 +26,16 @@ export function AdminNotice({
         </p>
       )}
       {!databaseReady && (
-        <p className="flex items-start gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-3 text-sm text-foreground">
+        <div className="flex items-start gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-3 text-sm text-foreground">
           <Database className="mt-0.5 size-4 shrink-0 text-gold-on-light" />
-          No database is connected, so changes here can&apos;t be saved yet. The values below are
-          the built-in defaults.
-        </p>
+          <div>
+            <p>
+              No database is connected, so changes here can&apos;t be saved yet. The values below
+              are the built-in defaults.
+            </p>
+            {databaseHint && <p className="mt-1 text-muted-foreground">{databaseHint}</p>}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import { DeliveryRatesPanel } from "@/components/dashboard/settings/delivery-rat
 import { SettingsView } from "@/components/dashboard/settings/settings-view";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { getPlatformSettings, getZoneRates } from "@/lib/platform-settings";
-import { isDatabaseConfigured } from "@/lib/db-status";
+import { databaseSetupHint, isDatabaseConfigured } from "@/lib/db-status";
 
 export const metadata = { title: "Settings" };
 
@@ -26,7 +26,11 @@ export default async function SettingsPage() {
         title="Settings"
         description="Business profile, pricing, delivery rates, and integrations"
       />
-      <AdminNotice isOwner={isOwner} databaseReady={databaseReady} />
+      <AdminNotice
+        isOwner={isOwner}
+        databaseReady={databaseReady}
+        databaseHint={databaseSetupHint()}
+      />
       <div className="flex flex-col gap-5">
         <BusinessSettingsForm settings={settings} canEdit={canEdit} />
         <DeliveryRatesPanel zones={zones} canEdit={canEdit} />

@@ -37,7 +37,12 @@ export function GET() {
         process.env.OWNER_PASSWORD_HASH ?? ""
       ),
     },
-    database: { configured: isDatabaseConfigured() },
+    database: {
+      configured: isDatabaseConfigured(),
+      // Why, and whether it can actually be reached, lives in the dedicated
+      // database diagnostic — this endpoint is about auth.
+      details: "/api/health/db",
+    },
     google: { configured: isGoogleConfigured() },
     siteUrlSet: Boolean(process.env.NEXT_PUBLIC_SITE_URL),
   });
