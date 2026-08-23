@@ -2,6 +2,8 @@ import "server-only";
 
 import bcrypt from "bcryptjs";
 import type { UserRole } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { isDatabaseConfigured } from "@/lib/db-status";
 
 /**
  * Bootstrap owner account, configured entirely through environment variables.
@@ -46,6 +48,64 @@ export function getOwnerAccount(): OwnerAccount | null {
     name: process.env.OWNER_NAME?.trim() || "PhiBakes Owner",
     role: "OWNER",
   };
+}
+
+/**
+ * Gives the env-configured owner a real database row once a database exists.
+ *
+ * The env account is deliberately row-less, which is right while there's no
+ * database and wrong the moment there is one: it can't be edited, can't own
+ * anything, and leaves the console permanently read-only for the person who is
+ * supposed to control it. On sign-in, adopt or create the matching User row and
+ * put *its* id in the session, so from then on the owner is an ordinary
+ * database user — editable profile, changeable password, everything.
+ *
+ * Returns null if there's no database or the write fails, and the caller then
+ * falls back to the env identity. That fallback is the whole point of this
+ * account: a broken database must not lock the owner out of their own console.
+ */
+export async function ensureOwnerUserRow(owner: OwnerAccount) {
+  if (!isDatabaseConfigured()) return null;
+
+  const select = { id: true, name: true, email: true, role: true } as const;
+
+  try {
+    const existing = await prisma.user.findUnique({ where: { email: owner.email }, select });
+
+    if (existing) {
+      // The address may already exist as a customer — from a storefront signup
+      // before the owner account was configured. OWNER_EMAIL is set by whoever
+      // controls the deployment, so treat it as authoritative and promote,
+      // rather than signing them into a downgraded session.
+      if (existing.role !== "OWNER") {
+        return await prisma.user.update({
+          where: { id: existing.id },
+          data: { role: "OWNER" },
+          select,
+        });
+      }
+      return existing;
+    }
+
+    // Carry the configured password across so the same credentials keep working
+    // after the promotion. A hash is stored as-is; plaintext is hashed here so
+    // it never lands in the database in the clear.
+    const configuredHash = process.env.OWNER_PASSWORD_HASH?.trim();
+    const plain = process.env.OWNER_PASSWORD;
+    const passwordHash = configuredHash
+      ? configuredHash
+      : plain
+        ? await bcrypt.hash(plain, 12)
+        : null;
+
+    return await prisma.user.create({
+      data: { name: owner.name, email: owner.email, role: "OWNER", passwordHash },
+      select,
+    });
+  } catch (err) {
+    console.error("[auth] couldn't give the owner a database row:", err);
+    return null;
+  }
 }
 
 /** True when the supplied credentials match the configured owner. */
