@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ProfileForms } from "@/components/dashboard/profile/profile-forms";
 import { requireStaff } from "@/lib/auth/dal";
 import { prisma } from "@/lib/prisma";
-import { isDatabaseConfigured } from "@/lib/db-status";
+import { databaseSetupHint, isDatabaseConfigured } from "@/lib/db-status";
 import { OWNER_ACCOUNT_ID } from "@/lib/auth/owner-account";
 import { parseKenyanPhone } from "@/lib/kenya-phone";
 
@@ -43,7 +43,7 @@ export default async function DashboardProfilePage() {
   const reason = isEnvOwner
     ? "You're signed in with the environment-configured owner account, which has no database record. Its name, email, and password come from OWNER_NAME, OWNER_EMAIL, and OWNER_PASSWORD_HASH — change them there, or connect a database and create an owner account for an editable profile."
     : !databaseReady
-      ? "No database is connected, so profile changes can't be saved yet."
+      ? `No database is connected, so profile changes can't be saved yet. ${databaseSetupHint() ?? ""}`.trim()
       : undefined;
 
   return (
