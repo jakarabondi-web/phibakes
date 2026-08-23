@@ -121,7 +121,7 @@ export function DashboardTopbar({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/settings">
+              <Link href="/dashboard/profile">
                 <UserRound /> My Profile
               </Link>
             </DropdownMenuItem>

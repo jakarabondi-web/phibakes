@@ -3,6 +3,8 @@
 import * as React from "react";
 import { AlertTriangle, KeyRound, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useActionState } from "react";
+import { updateProfile, type ProfileState } from "@/lib/profile/actions";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +40,11 @@ export default function ProfilePage() {
   const [name, setName] = React.useState(CURRENT_CUSTOMER.name);
   const [email, setEmail] = React.useState(CURRENT_CUSTOMER.email);
   const [phone, setPhone] = React.useState(CURRENT_CUSTOMER.phone);
+  const [profileState, profileAction, profilePending] = useActionState<ProfileState, FormData>(updateProfile, {});
+  React.useEffect(() => {
+    if (profileState.ok) toast.success("Profile updated successfully.");
+    else if (profileState.error) toast.error(profileState.error);
+  }, [profileState]);
   const [prefs, setPrefs] = React.useState(defaultPrefs());
   const [deleteOpen, setDeleteOpen] = React.useState(false);
 
@@ -70,28 +77,22 @@ export default function ProfilePage() {
             </Button>
           </div>
 
-          <form
-            className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              toast.success("Profile updated successfully.");
-            }}
-          >
+          <form action={profileAction} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="profile-name">Full Name</Label>
-              <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} />
+              <Input id="profile-name" name="name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="profile-email">Email Address</Label>
-              <Input id="profile-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input id="profile-email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <Label htmlFor="profile-phone">Phone Number</Label>
-              <Input id="profile-phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="sm:max-w-xs" />
+              <Input id="profile-phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="sm:max-w-xs" />
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit">
-                <Save /> Save Changes
+              <Button type="submit" disabled={profilePending}>
+                <Save /> {profilePending ? "Saving…" : "Save Changes"}
               </Button>
             </div>
           </form>
