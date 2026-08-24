@@ -112,6 +112,40 @@ export async function updateProfile(
   return { ok: true };
 }
 
+/**
+ * Data URLs produced by fileToAvatarDataUrl() top out around 60-90KB for a
+ * 256x256 WebP/JPEG. This caps well above that — generously enough for any
+ * real output, tight enough to reject someone posting an arbitrary blob
+ * through the action directly rather than through the resizer.
+ */
+const MAX_AVATAR_DATA_URL_LENGTH = 400_000;
+
+export async function updateAvatar(dataUrl: string): Promise<ProfileState> {
+  const user = await getCurrentUser();
+  if (!user) return { error: "You're signed out. Sign in again to continue." };
+  if (user.id === OWNER_ACCOUNT_ID) return { error: ENV_OWNER_MESSAGE };
+  if (!isDatabaseConfigured()) return { error: NO_DB };
+
+  if (!/^data:image\/(webp|jpeg|png);base64,/.test(dataUrl)) {
+    return { error: "That doesn't look like an image. Please try again." };
+  }
+  if (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH) {
+    return { error: "That image is too large. Please try a different photo." };
+  }
+
+  try {
+    await prisma.user.update({ where: { id: user.id }, data: { avatarUrl: dataUrl } });
+  } catch (err) {
+    console.error("[profile] avatar update failed:", err);
+    return { error: "Couldn't save your photo. Please try again." };
+  }
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/account/profile");
+  return { ok: true };
+}
+
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "Enter your current password."),

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { toast } from "sonner";
-import { Save, KeyRound, AlertCircle, Info } from "lucide-react";
+import { Save, KeyRound, AlertCircle, Info, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { initials } from "@/lib/utils";
-import { updateProfile, changePassword, type ProfileState } from "@/lib/profile/actions";
+import { updateProfile, changePassword, updateAvatar, type ProfileState } from "@/lib/profile/actions";
+import { fileToAvatarDataUrl, AvatarImageError } from "@/lib/image-resize";
 
 type Me = {
   name: string;
@@ -55,6 +56,37 @@ export function ProfileForms({
   const [wState, wAction, wPending] = useActionState<ProfileState, FormData>(changePassword, {});
   const pwFormRef = React.useRef<HTMLFormElement>(null);
 
+  const [avatarUrl, setAvatarUrl] = React.useState(me.avatarUrl ?? null);
+  const [avatarPending, startAvatarTransition] = React.useTransition();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  async function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // let the same file be picked again after an error
+    if (!file) return;
+
+    let dataUrl: string;
+    try {
+      dataUrl = await fileToAvatarDataUrl(file);
+    } catch (err) {
+      toast.error(err instanceof AvatarImageError ? err.message : "Couldn't process that image.");
+      return;
+    }
+
+    // Calling a Server Action from outside a <form action> should be wrapped in
+    // a transition — that's what gives Next.js the pending state and makes it
+    // refresh the topbar's server-rendered avatar once this resolves.
+    startAvatarTransition(async () => {
+      const result = await updateAvatar(dataUrl);
+      if (result.ok) {
+        setAvatarUrl(dataUrl);
+        toast.success("Photo updated");
+      } else {
+        toast.error(result.error ?? "Couldn't update your photo.");
+      }
+    });
+  }
+
   React.useEffect(() => {
     if (pState.ok) toast.success("Profile updated");
     else if (pState.error) toast.error(pState.error);
@@ -82,7 +114,7 @@ export function ProfileForms({
         <CardContent className="mt-4 p-0">
           <div className="mb-5 flex items-center gap-4">
             <Avatar className="size-14">
-              {me.avatarUrl && <AvatarImage src={me.avatarUrl} alt="" />}
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
               <AvatarFallback>{initials(me.name)}</AvatarFallback>
             </Avatar>
             <div>
@@ -90,6 +122,28 @@ export function ProfileForms({
               <Badge variant="gold" className="mt-1">
                 {me.role}
               </Badge>
+              {editable && (
+                <div className="mt-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarPick}
+                    aria-label="Choose a profile photo"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={avatarPending}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Camera className="size-3.5" />
+                    {avatarPending ? "Uploading…" : "Change photo"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
