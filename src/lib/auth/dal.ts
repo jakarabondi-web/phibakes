@@ -45,16 +45,42 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   // immediately bounce them back to /login.
   if (session.userId === OWNER_ACCOUNT_ID) {
     const owner = getOwnerAccount();
-    return owner
-      ? {
-          id: owner.id,
-          name: owner.name,
-          email: owner.email,
-          role: owner.role,
-          avatarUrl: null,
-          twoFactorEnabled: false,
-        }
-      : null;
+    if (!owner) return null;
+
+    // The session cookie is 7 days old and was minted before a database
+    // existed, it still says "env-owner" — but sign-in since then may have
+    // created a real row for this address (see ensureOwnerUserRow). Prefer
+    // that row when it exists: without this, a signed-in owner's profile and
+    // settings stay permanently read-only until they happen to sign out and
+    // back in, with nothing telling them that's what's wrong.
+    if (isDatabaseConfigured()) {
+      try {
+        const row = await prisma.user.findUnique({
+          where: { email: owner.email },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            avatarUrl: true,
+            twoFactorEnabled: true,
+          },
+        });
+        if (row) return row;
+      } catch {
+        // Fall through to the env identity below — a database hiccup here
+        // must not lock the owner out, which is this account's whole point.
+      }
+    }
+
+    return {
+      id: owner.id,
+      name: owner.name,
+      email: owner.email,
+      role: owner.role,
+      avatarUrl: null,
+      twoFactorEnabled: false,
+    };
   }
 
   // Without a database, fall back to the built-in demo accounts so the app is
