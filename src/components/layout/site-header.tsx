@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, ShoppingBag, UserRound, ArrowRight, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
@@ -33,6 +33,25 @@ function Wordmark() {
   );
 }
 
+type WhoAmI = { signedIn: boolean; isStaff: boolean };
+const SIGNED_OUT: WhoAmI = { signedIn: false, isStaff: false };
+
+/** /account itself is open to anyone (it's demo content until the customer
+ * portal is wired to real accounts), so the only distinction that matters
+ * here is staff vs everyone else — signed out or a customer both land on
+ * the same place they always did. */
+function destinationFor(who: WhoAmI): string {
+  return who.isStaff ? "/dashboard" : "/account";
+}
+
+/** The mobile sheet's bottom action, unlike the desktop icon, does
+ * distinguish signed-out (still "Sign in") from a signed-in customer. */
+function mobileAccountAction(who: WhoAmI): { href: string; label: string } {
+  if (who.isStaff) return { href: "/dashboard", label: "Dashboard" };
+  if (who.signedIn) return { href: "/account", label: "My Account" };
+  return { href: "/login", label: "Sign in" };
+}
+
 /**
  * Classic flush header: a solid, full-width bar with a hairline bottom
  * border — no floating pill, no rounded canvas. The row has a fixed height
@@ -43,36 +62,63 @@ function Wordmark() {
  * full-width dropdown sheet.
  */
 export function SiteHeader() {
-  // Defaults to the customer portal — correct for the common case (anonymous
-  // visitor or a customer) and safe even before the check below resolves.
-  // Staff get redirected to /dashboard once we know who's signed in; a cookie
-  // read alone would force this whole layout to render dynamically on every
-  // storefront page, so this asks a tiny endpoint instead of doing it here.
-  const [accountHref, setAccountHref] = React.useState("/account");
-  const [isStaff, setIsStaff] = React.useState(false);
+  const router = useRouter();
+  const [open, setOpen] = React.useState(false);
+
+  // Rendered before we know who's signed in — matches what a fresh, static
+  // page load looks like, so there's no hydration mismatch. whoPromise holds
+  // the in-flight request itself (not just its resolved value): a click that
+  // lands before the fetch settles awaits that *same* request in the handler
+  // below, rather than reading a still-default state and getting it wrong.
+  // (A real click before hydration finishes at all still falls through to
+  // this default — fixing that too would need server-rendering the decision,
+  // which needs Next 16's `cacheComponents` flag, an app-wide migration with
+  // build-breaking implications elsewhere in the app. Not a trade worth
+  // making for one header link; this closes the gap for everything after
+  // hydration, which is the overwhelming majority of real clicks.)
+  const [who, setWho] = React.useState<WhoAmI>(SIGNED_OUT);
+  const whoPromise = React.useRef<Promise<WhoAmI> | null>(null);
 
   React.useEffect(() => {
+    const promise = fetch("/api/auth/whoami")
+      .then((r) => r.json() as Promise<WhoAmI>)
+      .catch(() => SIGNED_OUT);
+    whoPromise.current = promise;
     let cancelled = false;
-    fetch("/api/auth/whoami")
-      .then((r) => r.json())
-      .then((data: { isStaff: boolean }) => {
-        if (!cancelled && data.isStaff) {
-          setAccountHref("/dashboard");
-          setIsStaff(true);
-        }
-      })
-      .catch(() => {
-        // Signed-out default is already correct; nothing to recover.
-      });
+    promise.then((data) => {
+      if (!cancelled) setWho(data);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
 
+  const goToAccount = React.useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      const resolved = whoPromise.current ? await whoPromise.current : who;
+      router.push(destinationFor(resolved));
+    },
+    [router, who]
+  );
+
+  const goToAccountMobile = React.useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      setOpen(false);
+      const resolved = whoPromise.current ? await whoPromise.current : who;
+      router.push(mobileAccountAction(resolved).href);
+    },
+    [router, who]
+  );
+
+  const accountHref = destinationFor(who);
+  const isStaff = who.isStaff;
+  const mobileAccount = mobileAccountAction(who);
+
   const pathname = usePathname();
   const { itemCount } = useCart();
   const { count: favouriteCount } = useFavourites();
-  const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   const isActive = React.useCallback(
@@ -127,6 +173,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-1">
           <Link
             href={accountHref}
+            onClick={goToAccount}
             aria-label={isStaff ? "Dashboard" : "Account"}
             className="hidden size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-blush hover:text-primary sm:inline-flex"
           >
@@ -211,11 +258,11 @@ export function SiteHeader() {
               Saved{favouriteCount > 0 ? ` (${favouriteCount})` : ""}
             </Link>
             <Link
-              href="/login"
-              onClick={() => setOpen(false)}
+              href={mobileAccount.href}
+              onClick={goToAccountMobile}
               className="flex min-h-11 flex-1 items-center justify-center rounded-2xl border border-border bg-cream text-xs font-semibold uppercase tracking-wide text-primary"
             >
-              Sign in
+              {mobileAccount.label}
             </Link>
             <Link
               href="/cakes"
