@@ -1,15 +1,27 @@
 import { AccountTopbar } from "./account-topbar";
 import { AccountSidebar } from "./account-sidebar";
-import { CURRENT_CUSTOMER } from "../_lib/customer";
 import { unreadCount } from "../_lib/notifications";
 
-export function AccountShell({ children }: { children: React.ReactNode }) {
+/** The signed-in customer, resolved by the layout — never a demo identity. */
+export type AccountUser = {
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+};
+
+export function AccountShell({
+  user,
+  children,
+}: {
+  user: AccountUser;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-svh flex-col bg-secondary/30">
       <AccountTopbar
-        customerName={CURRENT_CUSTOMER.name}
-        customerEmail={CURRENT_CUSTOMER.email}
-        avatar={CURRENT_CUSTOMER.avatar}
+        customerName={user.name}
+        customerEmail={user.email}
+        avatar={user.avatarUrl ?? undefined}
         unread={unreadCount()}
       />
       <div className="mx-auto flex w-full max-w-[100rem] flex-1">
