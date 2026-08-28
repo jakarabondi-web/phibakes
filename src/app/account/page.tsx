@@ -18,13 +18,16 @@ import { formatDate, formatKes } from "@/lib/utils";
 import { CURRENT_CUSTOMER, getMyOrders, isActiveOrder } from "./_lib/customer";
 import { OrderStatusBadge } from "./_components/status-badge";
 import { PageHeader } from "./_components/page-header";
+import { getCurrentUser } from "@/lib/auth/dal";
 
 export const metadata = { title: "Dashboard" };
 
-export default function AccountDashboardPage() {
+export default async function AccountDashboardPage() {
+  // Memoized per request — the layout already resolved this user.
+  const user = await getCurrentUser();
   const orders = getMyOrders();
   const activeOrders = orders.filter(isActiveOrder);
-  const firstName = CURRENT_CUSTOMER.name.split(" ")[0];
+  const firstName = (user?.name ?? "there").split(" ")[0];
 
   // eslint-disable-next-line react-hooks/purity -- server component; needs the real current time to find the next upcoming event
   const now = Date.now();
@@ -36,7 +39,7 @@ export default function AccountDashboardPage() {
     <div>
       <PageHeader
         title={`Welcome back, ${firstName}`}
-        description={`${CURRENT_CUSTOMER.tier} member since ${formatDate(CURRENT_CUSTOMER.joinedAt, { month: "long", year: "numeric" })}`}
+        description="Here's what's happening with your orders and rewards."
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>

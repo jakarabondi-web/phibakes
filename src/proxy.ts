@@ -44,6 +44,13 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/account", request.url));
   }
 
+  // And staff must not land in the customer portal: its pages are built
+  // around a customer record staff don't have, so showing them there reads
+  // as being signed into someone else's account. Their console is /dashboard.
+  if (needsCustomer && session && isStaffRole(session.role)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   // Already signed in? Don't show the sign-in/registration pages again.
   if (isAuthPage && session) {
     const dest = isStaffRole(session.role) ? "/dashboard" : "/account";
