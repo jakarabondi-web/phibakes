@@ -11,6 +11,12 @@ import { readSession, isStaffRole } from "@/lib/auth/session";
  * because the result only decides which link to show; /dashboard re-verifies
  * the session against the database itself and bounces anyone who isn't
  * actually staff, exactly as it did before this endpoint existed.
+ *
+ * (Server-rendering this decision instead of checking it client-side would
+ * be the more airtight fix — no window at all where a click could be wrong,
+ * not even before hydration — but that requires Next 16's `cacheComponents`
+ * flag, which is an app-wide migration with build-breaking implications
+ * across the rest of the site. Not a trade to make for one header link.)
  */
 export const dynamic = "force-dynamic";
 
