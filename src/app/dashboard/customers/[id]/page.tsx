@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, Mail, Phone, Gift, Star } from "lucide-react";
-import { CUSTOMERS } from "@/lib/data/inventory";
 import { ORDERS } from "@/lib/data/orders";
+import { getDashboardCustomerById } from "@/lib/dashboard/customers";
+import { getDashboardOrdersForCustomer } from "@/lib/dashboard/orders";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ import { formatDate, formatKes, initials } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const customer = CUSTOMERS.find((c) => c.id === id);
+  const { customer } = await getDashboardCustomerById(id);
   return { title: customer ? customer.name : "Customer" };
 }
 
@@ -20,12 +21,15 @@ const TIER_VARIANT = { Bronze: "secondary", Silver: "secondary", Gold: "gold", P
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const customer = CUSTOMERS.find((c) => c.id === id);
+  const { customer, live } = await getDashboardCustomerById(id);
   if (!customer) notFound();
 
-  const orders = ORDERS.filter((o) => o.customerName === customer.name).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  // Demo orders carry no customer id, so the demo path matches by name.
+  const orders = live
+    ? await getDashboardOrdersForCustomer(customer.id)
+    : ORDERS.filter((o) => o.customerName === customer.name).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
   return (
     <div>
