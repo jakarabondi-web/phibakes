@@ -16,6 +16,11 @@ import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "@/components/dashboard/status-badge";
 import { formatDate, formatDateTime, formatKes } from "@/lib/utils";
 import { STAFF_NAMES } from "@/lib/data/staff";
+import {
+  updateOrderStatus,
+  saveOrderInternalNotes,
+  assignOrderStaff,
+} from "@/lib/dashboard/order-actions";
 
 const PAYMENT_ICON: Record<PaymentRecord["method"], LucideIcon> = {
   mpesa: Wallet,
@@ -25,13 +30,72 @@ const PAYMENT_ICON: Record<PaymentRecord["method"], LucideIcon> = {
   cash: Banknote,
 };
 
-export function OrderDetailPanel({ order }: { order: Order }) {
+export function OrderDetailPanel({
+  order,
+  live = false,
+  staffOptions = [],
+}: {
+  order: Order;
+  /** true = this order is a real database row; mutations persist. false = demo data, mutations are simulated. */
+  live?: boolean;
+  /** Real staff rows for the assignment picker (live mode only). */
+  staffOptions?: { id: string; name: string }[];
+}) {
   const [status, setStatus] = React.useState(order.status);
-  const [assignedStaff, setAssignedStaff] = React.useState(order.assignedStaff ?? "unassigned");
+  // Live mode selects by staff id; demo mode by name (the demo data has no ids).
+  const [assignedStaff, setAssignedStaff] = React.useState(
+    live ? (order.assignedStaffId ?? "unassigned") : (order.assignedStaff ?? "unassigned")
+  );
   const [internalNotes, setInternalNotes] = React.useState(order.internalNotes ?? "");
+  const [pending, startTransition] = React.useTransition();
 
   const currentIdx = ORDER_STATUS_FLOW.indexOf(status);
   const nextStatus = currentIdx >= 0 && currentIdx < ORDER_STATUS_FLOW.length - 1 ? ORDER_STATUS_FLOW[currentIdx + 1] : null;
+
+  function saveStatus(next: Order["status"]) {
+    if (!live) {
+      // Demo data has nothing to persist to — simulate so the console stays explorable.
+      setStatus(next);
+      toast.success(`Order advanced to "${next}" (demo — not saved)`);
+      return;
+    }
+    startTransition(async () => {
+      const result = await updateOrderStatus({ code: order.code, status: next });
+      if (result.ok) {
+        setStatus(next);
+        toast.success(`Order ${order.code} is now "${next}"`);
+      } else {
+        toast.error(result.error ?? "Couldn't update the status.");
+      }
+    });
+  }
+
+  function saveNotes() {
+    if (!live) {
+      toast.success("Internal notes saved (demo — not saved)");
+      return;
+    }
+    startTransition(async () => {
+      const result = await saveOrderInternalNotes({ code: order.code, notes: internalNotes });
+      if (result.ok) toast.success("Internal notes saved");
+      else toast.error(result.error ?? "Couldn't save the notes.");
+    });
+  }
+
+  function saveAssignment(value: string) {
+    setAssignedStaff(value);
+    if (!live) {
+      toast.success(`Assigned ${value === "unassigned" ? "no one" : value} to ${order.code} (demo)`);
+      return;
+    }
+    const staffId = value === "unassigned" ? null : value;
+    const staffName = staffOptions.find((s) => s.id === value)?.name ?? "no one";
+    startTransition(async () => {
+      const result = await assignOrderStaff({ code: order.code, staffId });
+      if (result.ok) toast.success(`Assigned ${staffId ? staffName : "no one"} to ${order.code}`);
+      else toast.error(result.error ?? "Couldn't update the assignment.");
+    });
+  }
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -75,20 +139,12 @@ export function OrderDetailPanel({ order }: { order: Order }) {
               </SelectContent>
             </Select>
             {nextStatus && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setStatus(nextStatus);
-                  toast.success(`Order advanced to "${nextStatus}"`);
-                }}
-              >
+              <Button variant="outline" disabled={pending} onClick={() => saveStatus(nextStatus)}>
                 Advance to {nextStatus}
               </Button>
             )}
-            <Button
-              onClick={() => toast.success(`Order ${order.code} status saved as "${status}"`)}
-            >
-              Save Status
+            <Button disabled={pending} onClick={() => saveStatus(status)}>
+              {pending ? "Saving…" : "Save Status"}
             </Button>
           </div>
         </Card>
@@ -171,12 +227,8 @@ export function OrderDetailPanel({ order }: { order: Order }) {
               placeholder="Add internal notes about this order…"
               rows={4}
             />
-            <Button
-              size="sm"
-              className="self-start"
-              onClick={() => toast.success("Internal notes saved")}
-            >
-              Save Notes
+            <Button size="sm" className="self-start" disabled={pending} onClick={saveNotes}>
+              {pending ? "Saving…" : "Save Notes"}
             </Button>
           </div>
           {order.notes && (
@@ -258,23 +310,23 @@ export function OrderDetailPanel({ order }: { order: Order }) {
             <CardTitle>Assign Staff</CardTitle>
           </CardHeader>
           <CardContent className="mt-3 flex flex-col gap-3 p-0">
-            <Select
-              value={assignedStaff}
-              onValueChange={(v) => {
-                setAssignedStaff(v);
-                toast.success(`Assigned ${v === "unassigned" ? "no one" : v} to ${order.code}`);
-              }}
-            >
+            <Select value={assignedStaff} onValueChange={saveAssignment} disabled={pending}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Unassigned" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                {STAFF_NAMES.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
+                {live
+                  ? staffOptions.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))
+                  : STAFF_NAMES.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
               </SelectContent>
             </Select>
           </CardContent>

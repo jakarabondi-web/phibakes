@@ -134,6 +134,8 @@ export type Order = {
   eventDate: string;
   createdAt: string;
   assignedStaff?: string;
+  /** Staff row id backing assignedStaff — present only for database-backed orders. */
+  assignedStaffId?: string;
   productionPoints: number;
   notes?: string;
   internalNotes?: string;

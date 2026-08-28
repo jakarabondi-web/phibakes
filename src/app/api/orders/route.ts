@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { ORDERS } from "@/lib/data/orders";
 import { isDatabaseConfigured, logDbFallback } from "@/lib/db-status";
+import { getCurrentUser } from "@/lib/auth/dal";
 import type { Order, OrderStatus } from "@/types";
 
 const orderItemSchema = z.object({
@@ -87,17 +88,27 @@ export async function POST(request: NextRequest) {
   const code = generateOrderCode();
   const fulfilment = data.fulfilment.toUpperCase() as "PICKUP" | "DELIVERY";
 
-  // An order without a customerId is a guest checkout, not a failure — it has no
-  // customer row to attach to, so it takes the synthesized path regardless.
-  const isGuestOrder = !data.customerId;
+  // The signed-in session is the only authority on who is placing this order.
+  // The request body's customerId is deliberately ignored: trusting it would
+  // let any caller attach an order to someone else's account. No session (or
+  // a session with no customer row) means a guest checkout, which has no row
+  // to attach to and takes the synthesized path.
+  const sessionUser = await getCurrentUser().catch(() => null);
+  const customerId = sessionUser
+    ? await prisma.customer
+        .findUnique({ where: { userId: sessionUser.id }, select: { id: true } })
+        .then((c) => c?.id ?? null)
+        .catch(() => null)
+    : null;
+  const isGuestOrder = !customerId;
 
   try {
-    if (!data.customerId) throw new Error("Guest order — no customer row to attach to");
+    if (!customerId) throw new Error("Guest order — no customer row to attach to");
 
     const order = await prisma.order.create({
       data: {
         code,
-        customerId: data.customerId,
+        customerId,
         status: "REQUESTED",
         fulfilment,
         addressId: data.addressId,

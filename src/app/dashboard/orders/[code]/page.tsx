@@ -1,20 +1,29 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
-import { getOrderByCode } from "@/lib/data/orders";
+import { getDashboardOrderByCode } from "@/lib/dashboard/orders";
+import { getStaffDirectory } from "@/lib/staff-directory";
 import { formatDate } from "@/lib/utils";
 import { OrderDetailPanel } from "@/components/dashboard/orders/order-detail-panel";
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  const order = getOrderByCode(code);
+  const { order } = await getDashboardOrderByCode(code);
   return { title: order ? `Order ${order.code}` : "Order" };
 }
 
 export default async function DashboardOrderDetailPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  const order = getOrderByCode(code);
+  const [{ order, live }, staff] = await Promise.all([
+    getDashboardOrderByCode(code),
+    getStaffDirectory(),
+  ]);
   if (!order) notFound();
+
+  // Only rows that exist in the database can be assigned to an order.
+  const staffOptions = staff
+    .filter((s) => s.persisted && s.isActive)
+    .map((s) => ({ id: s.id, name: s.name }));
 
   return (
     <div>
@@ -34,7 +43,7 @@ export default async function DashboardOrderDetailPage({ params }: { params: Pro
         </div>
       </div>
 
-      <OrderDetailPanel order={order} />
+      <OrderDetailPanel order={order} live={live} staffOptions={staffOptions} />
     </div>
   );
 }
