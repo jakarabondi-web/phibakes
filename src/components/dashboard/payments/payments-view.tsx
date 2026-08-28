@@ -22,15 +22,15 @@ const METHOD_ICON: Record<PaymentRecord["method"], LucideIcon> = {
   cash: Banknote,
 };
 
-export function PaymentsView({ orders }: { orders: Order[] }) {
+export function PaymentsView({ orders, live = false }: { orders: Order[]; live?: boolean }) {
   const rows: Row[] = orders.flatMap((o) =>
     o.payments.map((p) => ({ ...p, orderCode: o.code, customerName: o.customerName }))
   );
 
-  // Synthetic failed/pending entries for demo purposes — the seeded ORDERS
-  // dataset only contains successful payments, but a real bakery will see
-  // occasional M-PESA timeouts and reversals.
-  rows.push(
+  // Synthetic failed/pending entries for demo purposes only — the seeded
+  // ORDERS dataset contains only successful payments, but a real bakery will
+  // see occasional M-PESA timeouts and reversals. Never mixed into live data.
+  if (!live) rows.push(
     {
       id: "pay-demo-failed-1",
       type: "balance",
