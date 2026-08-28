@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { QUOTES } from "@/lib/data/quotes";
 import { isDatabaseConfigured, logDbFallback } from "@/lib/db-status";
+import { getCurrentUser } from "@/lib/auth/dal";
 import type { Quote } from "@/types";
 
 const createQuoteSchema = z.object({
@@ -95,17 +96,26 @@ export async function POST(request: NextRequest) {
   const code = generateQuoteCode();
   const estimatedPrice = estimateQuotePrice(data);
 
-  // A quote without a customerId is a guest request, not a failure — it has no
-  // row to attach to, so it takes the synthesized path even with a live database.
-  const isGuestRequest = !data.customerId;
+  // As with orders, the signed-in session is the only authority on who is
+  // asking. The body's customerId is ignored — trusting it would let a caller
+  // file quotes against someone else's account. No session (or no customer
+  // row) means a guest request, which takes the synthesized path.
+  const sessionUser = await getCurrentUser().catch(() => null);
+  const customerId = sessionUser
+    ? await prisma.customer
+        .findUnique({ where: { userId: sessionUser.id }, select: { id: true } })
+        .then((c) => c?.id ?? null)
+        .catch(() => null)
+    : null;
+  const isGuestRequest = !customerId;
 
   try {
-    if (!data.customerId) throw new Error("Guest quote — no customer row to attach to");
+    if (!customerId) throw new Error("Guest quote — no customer row to attach to");
 
     const quote = await prisma.quote.create({
       data: {
         code,
-        customerId: data.customerId,
+        customerId,
         occasion: data.occasion,
         size: data.size,
         flavour: data.flavour,

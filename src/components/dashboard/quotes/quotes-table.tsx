@@ -17,14 +17,51 @@ import {
 } from "@/components/ui/dialog";
 import { QuoteStatusBadge } from "@/components/dashboard/status-badge";
 import { formatDate, formatKes } from "@/lib/utils";
+import { sendQuote, convertQuoteToOrder } from "@/lib/dashboard/quote-actions";
 
-export function QuotesTable({ quotes }: { quotes: Quote[] }) {
+export function QuotesTable({ quotes, live = false }: { quotes: Quote[]; live?: boolean }) {
   const [active, setActive] = React.useState<Quote | null>(null);
   const [price, setPrice] = React.useState<string>("");
+  const [pending, startTransition] = React.useTransition();
 
   function openQuote(q: Quote) {
     setActive(q);
     setPrice(String(q.quotedPrice ?? q.estimatedPrice ?? ""));
+  }
+
+  function handleSend(q: Quote) {
+    const amount = Number(price);
+    if (!live) {
+      toast.success(`Quote ${q.code} sent to ${q.customerName} for ${formatKes(amount || 0)} (demo — not saved)`);
+      setActive(null);
+      return;
+    }
+    startTransition(async () => {
+      const result = await sendQuote({ code: q.code, price: amount });
+      if (result.ok) {
+        toast.success(`Quote ${q.code} priced at ${formatKes(amount)} and marked as Quoted`);
+        setActive(null);
+      } else {
+        toast.error(result.error ?? "Couldn't send that quote.");
+      }
+    });
+  }
+
+  function handleConvert(q: Quote) {
+    if (!live) {
+      toast.success(`Quote ${q.code} converted to a new order (demo — not saved)`);
+      setActive(null);
+      return;
+    }
+    startTransition(async () => {
+      const result = await convertQuoteToOrder({ code: q.code });
+      if (result.ok) {
+        toast.success(`Quote ${q.code} converted to order ${result.orderCode}`);
+        setActive(null);
+      } else {
+        toast.error(result.error ?? "Couldn't convert that quote.");
+      }
+    });
   }
 
   return (
@@ -115,22 +152,11 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
               </div>
 
               <DialogFooter className="gap-2 sm:gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    toast.success(`Quote ${active.code} sent to ${active.customerName} for ${formatKes(Number(price) || 0)}`);
-                    setActive(null);
-                  }}
-                >
-                  Send Quote
+                <Button variant="outline" disabled={pending} onClick={() => handleSend(active)}>
+                  {pending ? "Working…" : "Send Quote"}
                 </Button>
-                <Button
-                  onClick={() => {
-                    toast.success(`Quote ${active.code} converted to a new order`);
-                    setActive(null);
-                  }}
-                >
-                  Convert to Order
+                <Button disabled={pending} onClick={() => handleConvert(active)}>
+                  {pending ? "Working…" : "Convert to Order"}
                 </Button>
               </DialogFooter>
             </>
