@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { GalleryGrid } from "./gallery-grid";
+import { getPublicGalleryItems } from "@/lib/gallery/data";
 
 export const metadata: Metadata = {
   title: "Gallery",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
     "Browse PhiBakes' portfolio of wedding, birthday, corporate, and graduation cakes — photographed in our Nairobi studio.",
 };
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const items = await getPublicGalleryItems();
+
   return (
     <section className="bg-noise">
       <div className="container-luxe py-16 sm:py-24">
@@ -27,7 +30,7 @@ export default function GalleryPage() {
         </div>
 
         <div className="mt-14">
-          <GalleryGrid />
+          <GalleryGrid items={items} />
         </div>
       </div>
     </section>

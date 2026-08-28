@@ -46,6 +46,7 @@ model User {
   auditLogs      AuditLog[]
   reviews        Review[]
   passwordResets PasswordResetToken[]
+  galleryItems   GalleryItem[]
 
   @@index([role])
 }
@@ -127,6 +128,35 @@ model DeliveryZoneRate {
   updatedAt  DateTime @updatedAt
 
   @@index([isActive])
+}
+
+enum GalleryMediaType {
+  IMAGE
+  VIDEO
+}
+
+/**
+ * A photo or video in the public portfolio gallery. Files live in Cloudflare
+ * R2 (or S3-compatible storage) — this row is just the pointer plus metadata,
+ * never the bytes. `objectKey` is the bucket key, kept separately from `url`
+ * so a deleted row can also delete the object it points to without having to
+ * re-derive the key from a public URL.
+ */
+model GalleryItem {
+  id           String           @id @default(cuid())
+  type         GalleryMediaType @default(IMAGE)
+  url          String
+  objectKey    String           @unique
+  posterUrl    String? // video thumbnail; unused for images
+  caption      String
+  category     String           @default("uncategorised")
+  sortOrder    Int              @default(0)
+  isPublished  Boolean          @default(true)
+  uploadedById String?
+  uploadedBy   User?            @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime         @default(now())
+
+  @@index([isPublished, category])
 }
 
 // ---------------------------------------------------------------------------
