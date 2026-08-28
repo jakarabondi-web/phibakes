@@ -43,6 +43,32 @@ function Wordmark() {
  * full-width dropdown sheet.
  */
 export function SiteHeader() {
+  // Defaults to the customer portal — correct for the common case (anonymous
+  // visitor or a customer) and safe even before the check below resolves.
+  // Staff get redirected to /dashboard once we know who's signed in; a cookie
+  // read alone would force this whole layout to render dynamically on every
+  // storefront page, so this asks a tiny endpoint instead of doing it here.
+  const [accountHref, setAccountHref] = React.useState("/account");
+  const [isStaff, setIsStaff] = React.useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/whoami")
+      .then((r) => r.json())
+      .then((data: { isStaff: boolean }) => {
+        if (!cancelled && data.isStaff) {
+          setAccountHref("/dashboard");
+          setIsStaff(true);
+        }
+      })
+      .catch(() => {
+        // Signed-out default is already correct; nothing to recover.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const pathname = usePathname();
   const { itemCount } = useCart();
   const { count: favouriteCount } = useFavourites();
@@ -100,8 +126,8 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-1">
           <Link
-            href="/account"
-            aria-label="Account"
+            href={accountHref}
+            aria-label={isStaff ? "Dashboard" : "Account"}
             className="hidden size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-blush hover:text-primary sm:inline-flex"
           >
             <UserRound className="size-[19px]" strokeWidth={1.8} />
