@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Bell, Moon, Search, Sun, LogOut, Settings, UserRound } from "lucide-react";
+import { Bell, Moon, Search, Store, Sun, Settings, UserRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,9 +17,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DashboardMobileNav } from "@/components/dashboard/sidebar";
-import { AVATAR_IMAGES } from "@/lib/data/images";
+import { SignOutItem } from "@/components/auth/sign-out-item";
 import { REFERENCE_DATE } from "@/lib/dashboard-data";
-import { formatDate } from "@/lib/utils";
+import { formatDate, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
 const NOTIFICATIONS = [
@@ -105,8 +105,8 @@ export function DashboardTopbar({
           <DropdownMenuTrigger asChild>
             <button className="ml-1 flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 hover:bg-secondary">
               <Avatar className="size-7">
-                <AvatarImage src={AVATAR_IMAGES[0]} alt="Owner" />
-                <AvatarFallback>PM</AvatarFallback>
+                {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
+                <AvatarFallback>{initials(displayName)}</AvatarFallback>
               </Avatar>
               <span className="hidden flex-col items-start leading-tight sm:flex">
                 <span className="text-sm font-medium">{displayName}</span>
@@ -133,9 +133,11 @@ export function DashboardTopbar({
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/">
-                <LogOut /> Back to Storefront
+                <Store /> Back to Storefront
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <SignOutItem />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
