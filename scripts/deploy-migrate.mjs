@@ -17,6 +17,7 @@
  */
 
 import { spawnSync } from "node:child_process";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * Migrations want a direct connection. Running them over a transaction pooler
@@ -73,3 +74,38 @@ if (result.status !== 0) {
 }
 
 console.log("[migrate] Migrations applied.");
+
+/**
+ * First deploy after a database is connected gets the same catalog the
+ * storefront has always shown — as real, editable Product rows instead of
+ * the compiled-in list — so nothing customers currently see disappears the
+ * moment the storefront switches to reading the database.
+ *
+ * Guarded on the product table being empty, checked every deploy but only
+ * ever true once: the moment a single product exists — seeded here or added
+ * by the owner — every later deploy is a no-op. An owner's edits or deletes
+ * are never overwritten or resurrected by a redeploy. Best-effort: unlike
+ * migrations, a failure here doesn't ship a broken app, so it warns and lets
+ * the build continue rather than failing it.
+ */
+try {
+  const url = process.env[name].trim();
+  const prisma = new PrismaClient({ datasourceUrl: url });
+  const productCount = await prisma.product.count();
+  await prisma.$disconnect();
+
+  if (productCount > 0) {
+    console.log(`[seed] ${productCount} product(s) already exist — skipping catalog seed.`);
+  } else {
+    console.log("[seed] No products yet — loading the starter catalog…");
+    const seed = spawnSync("npx", ["tsx", "prisma/seed-catalog.ts"], {
+      stdio: "inherit",
+      env: { ...process.env, DATABASE_URL: url },
+    });
+    if (seed.status !== 0) {
+      console.warn("[seed] Catalog seed failed — continuing without it. The Products console can still add items by hand.");
+    }
+  }
+} catch (err) {
+  console.warn("[seed] Couldn't check the product count — skipping catalog seed:", err?.message ?? err);
+}

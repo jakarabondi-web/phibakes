@@ -5,19 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/site/section-heading";
-import { CAKES, getCategory } from "@/lib/data";
+import { getCategory } from "@/lib/data";
+import { getCatalogReadyTodayCakes } from "@/lib/catalog";
 import { formatKes } from "@/lib/utils";
 
-const category = getCategory("ready-today");
-
-const readyTodayCakes = (() => {
-  const byCategory = CAKES.filter((c) => c.category === "ready-today");
-  if (byCategory.length >= 3) return byCategory.slice(0, 3);
-  const fallback = CAKES.filter((c) => c.available);
-  return fallback.slice(0, 3);
-})();
-
-export function ReadyToday() {
+export async function ReadyToday() {
+  const category = getCategory("ready-today");
+  const readyTodayCakes = await getCatalogReadyTodayCakes(3);
   return (
     <section className="py-20">
       <div className="container-luxe">

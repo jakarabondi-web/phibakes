@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCakeBySlug } from "@/lib/data/cakes";
+import { mapProductToCake } from "@/lib/catalog";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -8,10 +9,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   try {
     const product = await prisma.product.findUnique({
       where: { slug },
-      include: { category: true, reviews: true },
+      include: { category: { select: { slug: true } } },
     });
 
-    if (product) return NextResponse.json({ source: "db", cake: product });
+    if (product) return NextResponse.json({ source: "db", cake: mapProductToCake(product) });
 
     // Not found in DB — try the mock catalogue before declaring a 404 (keeps the
     // sandbox/demo experience working when there is no real database).

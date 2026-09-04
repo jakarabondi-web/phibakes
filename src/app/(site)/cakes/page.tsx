@@ -4,15 +4,21 @@ import { Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeading } from "@/components/site/section-heading";
 import { CatalogFilters } from "@/components/site/catalog-filters";
-import { CAKES, CATEGORIES, HERO_IMAGES } from "@/lib/data";
+import { CATEGORIES, HERO_IMAGES } from "@/lib/data";
+import { getCatalogCakes } from "@/lib/catalog";
 
+// Reads live product data (lib/catalog.ts) but stays statically cached and
+// fast — product-actions.ts revalidates this path on every catalog change,
+// so it's never stale in practice, without paying force-dynamic's per-request
+// cost on the highest-traffic storefront page.
 export const metadata = {
   title: "Shop All Cakes | PhiBakes",
   description:
     "Browse PhiBakes' full collection of handcrafted wedding, birthday, graduation, corporate and celebration cakes — baked to order in Nairobi.",
 };
 
-export default function CakesPage() {
+export default async function CakesPage() {
+  const cakes = await getCatalogCakes();
   return (
     <>
       <section className="relative overflow-hidden bg-noise">
@@ -63,11 +69,11 @@ export default function CakesPage() {
         <div className="container-luxe">
           <SectionHeading
             eyebrow="Full Catalog"
-            title={`${CAKES.length} Handcrafted Designs`}
+            title={`${cakes.length} Handcrafted Designs`}
             description="Use the filters below to narrow down by category, flavour, or size — or sort by price and rating."
           />
           <div className="mt-8">
-            <CatalogFilters cakes={CAKES} />
+            <CatalogFilters cakes={cakes} />
           </div>
         </div>
       </section>

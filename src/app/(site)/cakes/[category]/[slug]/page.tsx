@@ -10,10 +10,30 @@ import { CakeCard } from "@/components/site/cake-card";
 import { CakeGallery } from "@/components/site/cake-gallery";
 import { CakeOptions } from "@/components/site/cake-options";
 import { formatDate, formatKes, initials, cn } from "@/lib/utils";
-import { CAKES, getCakeBySlug, getRelatedCakes, getCategory } from "@/lib/data";
+import { getCategory } from "@/lib/data";
+import { getCatalogCakeBySlug, getCatalogRelatedCakes } from "@/lib/catalog";
+
+// Products change too often (and can be added/removed live) to enumerate
+// here, so generateStaticParams returns nothing to prerender at build time.
+// It still has to exist and run, though — that's what keeps this route in
+// Next's static/ISR pipeline at all; omitting it entirely makes a dynamic
+// segment render fully per-request with no caching (verified: without this,
+// every response carried Cache-Control: private, no-store — identical cost
+// to force-dynamic). With dynamicParams defaulting to true, a product's
+// page still renders on its first real visit and is cached from then on.
+// `revalidate` below is a distant time-based fallback only — in practice,
+// product-actions.ts calls revalidatePath("/(site)/cakes/[category]/[slug]", "page")
+// on every catalog change (create, edit, delete), so an edit shows up on
+// the next request rather than waiting for that first-visit cache to
+// expire. The route group has to be in the pattern — there's no layout.tsx
+// under /cakes for a "layout"-type call to cascade through, and without the
+// "(site)" prefix the "page"-type call silently misses this route too
+// (verified empirically: x-nextjs-cache stayed HIT with stale data until
+// the group was added to the pattern).
+export const revalidate = 3600;
 
 export function generateStaticParams() {
-  return CAKES.map((cake) => ({ category: cake.category, slug: cake.slug }));
+  return [];
 }
 
 export async function generateMetadata({
@@ -22,7 +42,7 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }) {
   const { slug } = await params;
-  const cake = getCakeBySlug(slug);
+  const cake = await getCatalogCakeBySlug(slug);
   if (!cake) return {};
   return {
     title: `${cake.name} | PhiBakes`,
@@ -54,11 +74,11 @@ export default async function CakeDetailPage({
   params: Promise<{ category: string; slug: string }>;
 }) {
   const { category: categorySlug, slug } = await params;
-  const cake = getCakeBySlug(slug);
+  const cake = await getCatalogCakeBySlug(slug);
   if (!cake || cake.category !== categorySlug) notFound();
 
   const category = getCategory(cake.category);
-  const related = getRelatedCakes(cake, 4);
+  const related = await getCatalogRelatedCakes(cake, 4);
 
   return (
     <>
