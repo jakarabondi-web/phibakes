@@ -203,7 +203,7 @@ export function ProductForm({
                     name="images"
                     value={url}
                     onChange={(e) => setImages((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
-                    placeholder="https://…"
+                    placeholder="https://… or /images/…"
                   />
                   <Button
                     type="button"

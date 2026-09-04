@@ -33,9 +33,20 @@ async function requireOwner(): Promise<ProductActionState | null> {
 function revalidateProductViews(id?: string) {
   revalidatePath("/dashboard/products");
   if (id) revalidatePath(`/dashboard/products/${id}`);
-  // The storefront doesn't read the database yet, but revalidating costs
-  // nothing today and means nothing has to change here once it does.
+  // There's no layout.tsx under /cakes, so a "layout"-type revalidation has
+  // nothing to cascade through — it only refreshes /cakes itself and
+  // silently leaves the category and detail pages stale. Each page pattern
+  // has to be targeted directly instead; "page" type matches every dynamic
+  // instance (every category, every product), not just one literal path —
+  // correct even when a product's category changes, since both the old and
+  // new category listings need invalidating either way.
   revalidatePath("/cakes");
+  revalidatePath("/(site)/cakes/[category]", "page");
+  revalidatePath("/(site)/cakes/[category]/[slug]", "page");
+  // The homepage's Featured Cakes and Ready Today sections read live
+  // products too (lib/catalog.ts) — a "Featured" tag or availability flip
+  // needs to show up there as well, not just on the catalog pages.
+  revalidatePath("/");
 }
 
 const categorySlugs = CATEGORY_OPTIONS.map((c) => c.slug) as [string, ...string[]];
@@ -58,8 +69,17 @@ const productSchema = z.object({
   sizes: z.array(z.enum(ALL_SIZES as [string, ...string[]])).min(1, "Select at least one size."),
   flavours: z.array(z.enum(ALL_FLAVOURS as [string, ...string[]])).min(1, "Select at least one flavour."),
   images: z
-    .array(z.string().trim().url("Each image must be a valid URL."))
-    .min(1, "Add at least one image URL.")
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1)
+        .refine(
+          (v) => v.startsWith("/") || /^https?:\/\//.test(v),
+          "Each image must be a full URL (https://…) or a site path starting with /."
+        )
+    )
+    .min(1, "Add at least one image.")
     .max(8, "Up to 8 images."),
   tags: z.array(z.string().trim().min(1)).max(10, "Up to 10 tags."),
 });

@@ -5,10 +5,23 @@ import { ChevronRight } from "lucide-react";
 import { SectionHeading } from "@/components/site/section-heading";
 import { CakeCard } from "@/components/site/cake-card";
 import { Badge } from "@/components/ui/badge";
-import { CATEGORIES, getCategory, getCakesByCategory } from "@/lib/data";
+import { CATEGORIES, getCategory } from "@/lib/data";
+import { getCatalogCakesByCategory } from "@/lib/catalog";
+
+// The 7 categories are a fixed taxonomy, so pre-rendering all of them at
+// build time is safe (see product-constants.ts CATEGORY_OPTIONS — the same
+// list is what product creation is restricted to). `generateStaticParams`
+// is what keeps this route in Next's static/ISR cache at all — without it,
+// dynamic segments render fully per-request with no caching, same cost as
+// force-dynamic. `revalidate` is a distant time-based fallback only;
+// product-actions.ts calls revalidatePath("/(site)/cakes/[category]", "page")
+// on every catalog change, so pages refresh immediately rather than waiting
+// for it — the "(site)" route group has to be in the pattern, or the call
+// silently misses this route (verified empirically).
+export const revalidate = 3600;
 
 export function generateStaticParams() {
-  return CATEGORIES.map((cat) => ({ category: cat.slug }));
+  return CATEGORIES.map((category) => ({ category: category.slug }));
 }
 
 export async function generateMetadata({
@@ -34,7 +47,7 @@ export default async function CategoryPage({
   const category = getCategory(categorySlug);
   if (!category) notFound();
 
-  const cakes = getCakesByCategory(category.slug);
+  const cakes = await getCatalogCakesByCategory(category.slug);
 
   return (
     <>

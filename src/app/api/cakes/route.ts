@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { CAKES } from "@/lib/data/cakes";
-import type { Cake } from "@/types";
+import { mapProductToCake } from "@/lib/catalog";
+import { SIZE_ENUM } from "@/lib/dashboard/product-constants";
+import type { Cake, CakeSize } from "@/types";
 
 function filterMockCakes(params: URLSearchParams): Cake[] {
   let results = [...CAKES];
@@ -48,7 +50,10 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {};
     if (category) where.category = { slug: category };
     if (flavour) where.flavours = { has: flavour };
-    if (size) where.sizes = { has: size };
+    // The query param is the friendly label ("1kg"); the column stores the
+    // DB enum ("ONE_KG") — without this conversion the filter silently
+    // matched nothing.
+    if (size && size in SIZE_ENUM) where.sizes = { has: SIZE_ENUM[size as CakeSize] };
     if (search) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
@@ -66,10 +71,10 @@ export async function GET(request: NextRequest) {
     const products = await prisma.product.findMany({
       where,
       orderBy,
-      include: { category: true },
+      include: { category: { select: { slug: true } } },
     });
 
-    return NextResponse.json({ source: "db", cakes: products });
+    return NextResponse.json({ source: "db", cakes: products.map(mapProductToCake) });
   } catch {
     // No live database connection (or query failed) — fall back to mock data so the
     // endpoint remains usable in this credential-less sandbox / for local demos.
