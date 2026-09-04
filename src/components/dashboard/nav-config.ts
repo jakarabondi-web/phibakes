@@ -19,6 +19,7 @@ import {
   Settings,
   ScrollText,
   ShoppingCart,
+  Cake,
 } from "lucide-react";
 
 export type NavItem = {
@@ -36,6 +37,10 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Overview",
     items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Catalog",
+    items: [{ label: "Products", href: "/dashboard/products", icon: Cake }],
   },
   {
     label: "Sales",
